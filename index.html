@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0a1a">
+<title>مغز من</title>
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+<style>
+:root{--bg1:#0a0a1a;--bg2:#131328;--accent:#8b5cf6;--accent2:#06b6d4;--glass:rgba(255,255,255,.06);--border:rgba(255,255,255,.1);--text:#f1f5f9;--muted:#94a3b8;--danger:#ef4444;--success:#22c55e;--warn:#f59e0b}
+[data-theme="light"]{--bg1:#eef2ff;--bg2:#dbeafe;--glass:rgba(255,255,255,.65);--border:rgba(0,0,0,.08);--text:#0f172a;--muted:#64748b}
+[data-accent="blue"]{--accent:#3b82f6;--accent2:#06b6d4}
+[data-accent="pink"]{--accent:#ec4899;--accent2:#f43f5e}
+[data-accent="green"]{--accent:#10b981;--accent2:#84cc16}
+[data-accent="orange"]{--accent:#f97316;--accent2:#eab308}
+[data-accent="red"]{--accent:#ef4444;--accent2:#f59e0b}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;font-family:'Vazirmatn',system-ui,sans-serif}
+html,body{min-height:100%;overflow-x:hidden}
+body{background:radial-gradient(circle at 20% 0%,var(--bg2),var(--bg1) 60%);color:var(--text);padding-bottom:100px;min-height:100vh;transition:background .5s,color .3s}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(600px circle at 0% 0%,color-mix(in srgb,var(--accent) 15%,transparent),transparent 40%),radial-gradient(500px circle at 100% 100%,color-mix(in srgb,var(--accent2) 12%,transparent),transparent 40%)}
+.glass{background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:20px}
+main{margin:0 10px;animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.section-title{font-size:15px;font-weight:700;margin:16px 4px 10px;display:flex;align-items:center;gap:8px}
+.section-title>span:first-child{font-size:19px}
+.section-title .hint-btn{margin-right:auto;width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer}
+.empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px}
+.empty-icon{font-size:44px;margin-bottom:10px;opacity:.5}
+
+.app-header{position:sticky;top:0;z-index:50;margin:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.h-left{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.h-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.h-greet{font-size:11px;color:var(--muted)}
+.weather-mini{padding:3px 9px;border-radius:12px;background:var(--glass);border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:4px}
+.h-time{font-size:26px;font-weight:800;letter-spacing:1px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.h-date{font-size:10px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+.h-actions{display:flex;gap:5px}
+.icon-btn{width:36px;height:36px;border-radius:12px;border:1px solid var(--border);background:var(--glass);color:var(--text);font-size:15px;cursor:pointer;display:grid;place-items:center;transition:.2s}
+.icon-btn:active{transform:scale(.9)}
+
+.bottom-nav{position:fixed;bottom:10px;left:10px;right:10px;z-index:60;display:grid;grid-template-columns:repeat(6,1fr);gap:2px;padding:7px 5px;background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--border);border-radius:20px}
+.nav-btn{padding:7px 1px;border-radius:12px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;font-size:8px;display:flex;flex-direction:column;align-items:center;gap:2px;transition:.25s}
+.nav-btn .ni{font-size:17px}
+.nav-btn.active{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 25%,transparent),color-mix(in srgb,var(--accent2) 20%,transparent));color:var(--text)}
+.nav-btn.active .ni{transform:scale(1.15)}
+
+.add-row{display:flex;gap:8px;padding:10px}
+.add-row input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:14px;padding:8px 10px;font-family:inherit;min-width:0}
+.add-row input::placeholder{color:var(--muted)}
+.add-row select{background:var(--glass);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:6px 10px;font-family:inherit;font-size:12px;outline:none}
+.add-row button{width:38px;height:38px;border-radius:12px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:20px;font-weight:700;flex-shrink:0}
+.add-row button:active{transform:scale(.92)}
+
+.task{display:flex;align-items:center;gap:10px;padding:12px;margin-bottom:8px;border-radius:16px;background:var(--glass);border:1px solid var(--border);transition:.25s}
+.task.done{opacity:.5}
+.task.done .task-title{text-decoration:line-through}
+.check{width:22px;height:22px;border-radius:8px;border:2px solid var(--muted);cursor:pointer;flex-shrink:0;display:grid;place-items:center;transition:.2s}
+.task.done .check{background:var(--success);border-color:var(--success)}
+.task.done .check::after{content:'✓';color:#fff;font-size:13px;font-weight:800}
+.task-title{flex:1;font-size:14px;line-height:1.4;word-break:break-word}
+.prio{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.prio.high{background:var(--danger)}.prio.med{background:var(--warn)}.prio.low{background:var(--success)}
+.rmd-badge{font-size:10px;padding:2px 6px;border-radius:8px;background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn);font-weight:600;flex-shrink:0}
+.icon-xs{width:26px;height:26px;border-radius:8px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:13px;flex-shrink:0;display:grid;place-items:center}
+.icon-xs:hover{color:var(--text)}
+.icon-xs.del:hover{color:var(--danger)}
+
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.stat-card{padding:12px 8px;border-radius:14px;background:var(--glass);border:1px solid var(--border);text-align:center}
+.stat-num{font-size:20px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:3px}
+
+.goal-card{padding:14px;border-radius:16px;background:var(--glass);border:1px solid var(--border);margin-bottom:10px}
+.goal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:13px}
+.goal-head b{font-weight:700}
+.goal-bar{height:8px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden}
+.goal-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s;border-radius:6px}
+.goal-fill.done{background:linear-gradient(90deg,var(--success),#22c55e)}
+
+.habit{padding:14px;margin-bottom:10px;border-radius:16px;background:var(--glass);border:1px solid var(--border)}
+.habit-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px}
+.habit-name{font-weight:600;font-size:14px;word-break:break-word}
+.habit-streak{font-size:11px;padding:3px 9px;border-radius:20px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:600}
+.days{display:flex;gap:5px;justify-content:space-between}
+.day{flex:1;aspect-ratio:1;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.03);cursor:pointer;transition:.2s;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:var(--muted);gap:2px}
+.day .dn{font-size:9px}.day .dd{font-weight:700;font-size:13px;color:var(--text)}
+.day.done{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent}
+.day.done .dd{color:#fff}
+.day.today{box-shadow:0 0 0 2px var(--accent2)}
+
+.note{padding:14px;margin-bottom:10px;border-radius:16px;background:var(--glass);border:1px solid var(--border);cursor:pointer}
+.note-title{font-weight:700;font-size:14px;margin-bottom:6px;word-break:break-word}
+.note-body{font-size:13px;color:var(--muted);line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.note-date{font-size:10px;color:var(--muted);margin-top:8px;opacity:.7}
+
+.pomo-wrap{display:flex;flex-direction:column;align-items:center;padding:30px 20px}
+.pomo-circle{width:240px;height:240px;border-radius:50%;position:relative;display:grid;place-items:center;margin-bottom:26px;background:conic-gradient(var(--accent) 0deg,rgba(255,255,255,.05) 0deg);transition:background .5s linear}
+.pomo-inner{width:200px;height:200px;border-radius:50%;background:var(--bg1);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 0 30px color-mix(in srgb,var(--accent) 20%,transparent)}
+.pomo-time{font-size:48px;font-weight:800;letter-spacing:2px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.pomo-mode{font-size:12px;color:var(--muted);margin-top:6px;letter-spacing:1px}
+.pomo-controls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.pomo-btn{padding:13px 24px;border-radius:16px;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;transition:.2s;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.pomo-btn.secondary{background:var(--glass);color:var(--text);border:1px solid var(--border)}
+.pomo-btn:active{transform:scale(.94)}
+
+.cal-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;margin-bottom:10px;border-radius:16px}
+.cal-head button{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--glass);color:var(--text);cursor:pointer;font-size:16px}
+.cal-head .cal-title{font-size:15px;font-weight:700}
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px;padding:0 4px}
+.cal-weekdays div{text-align:center;font-size:11px;color:var(--muted);padding:6px 0;font-weight:600}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:8px;border-radius:16px;background:var(--glass);border:1px solid var(--border)}
+.cal-day{aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--text);position:relative;transition:.2s;background:rgba(255,255,255,.02)}
+.cal-day.other{opacity:.25;pointer-events:none}
+.cal-day.today{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:700}
+.cal-day.has{border:1px solid color-mix(in srgb,var(--accent) 40%,transparent)}
+.cal-day .dots{display:flex;gap:2px;position:absolute;bottom:4px}
+.cal-day .dot{width:4px;height:4px;border-radius:50%}
+.cal-day .dot.t{background:var(--accent)}
+.cal-day .dot.h{background:var(--success)}
+.cal-day .dot.n{background:var(--warn)}
+.cal-day.today .dot{background:#fff}
+
+.big-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+.big-stat{padding:16px;border-radius:18px;background:var(--glass);border:1px solid var(--border);position:relative;overflow:hidden}
+.big-stat::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 40%,transparent),transparent 70%)}
+.big-stat .bs-icon{font-size:22px;margin-bottom:6px}
+.big-stat .bs-val{font-size:26px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.big-stat .bs-lbl{font-size:11px;color:var(--muted);margin-top:2px}
+.chart-wrap{padding:16px;border-radius:18px;background:var(--glass);border:1px solid var(--border);margin-bottom:16px}
+.chart-title{font-size:13px;font-weight:600;margin-bottom:14px;color:var(--muted)}
+.chart{display:flex;align-items:flex-end;gap:6px;height:120px;padding-bottom:22px;position:relative}
+.chart .bar{flex:1;background:linear-gradient(180deg,var(--accent),var(--accent2));border-radius:8px 8px 4px 4px;min-height:3px;position:relative;transition:.4s;box-shadow:0 0 12px color-mix(in srgb,var(--accent) 30%,transparent)}
+.chart .bar .val{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--text);font-weight:600}
+.chart .bar .lbl{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted)}
+.ach-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:6px}
+.ach{padding:14px 10px;border-radius:16px;background:var(--glass);border:1px solid var(--border);text-align:center;opacity:.35;transition:.3s}
+.ach.unlocked{opacity:1;border-color:color-mix(in srgb,var(--accent) 50%,transparent);box-shadow:0 0 20px color-mix(in srgb,var(--accent) 15%,transparent)}
+.ach-icon{font-size:30px;margin-bottom:6px}
+.ach-title{font-size:12px;font-weight:700}
+.ach-desc{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.4}
+
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeUp .3s}
+.modal{width:100%;max-width:440px;max-height:88vh;overflow-y:auto;padding:22px;border-radius:22px;background:var(--bg1);border:1px solid var(--border)}
+.modal h3{font-size:16px;margin-bottom:14px}
+.modal input,.modal textarea,.modal select{width:100%;padding:12px;border-radius:12px;margin-bottom:10px;background:var(--glass);border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:14px;outline:none;resize:none}
+.modal textarea{min-height:100px;line-height:1.6}
+.modal-actions{display:flex;gap:8px;margin-top:6px}
+.modal-actions button{flex:1;padding:12px;border-radius:12px;border:none;cursor:pointer;font-family:inherit;font-weight:600;font-size:14px;transition:.2s}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-ghost{background:var(--glass);color:var(--text);border:1px solid var(--border)!important}
+.btn-sm{padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:var(--glass);color:var(--text);cursor:pointer;font-family:inherit;font-size:12px}
+.btn-sm.danger{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 40%,transparent)}
+.td-row{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+.td-row .lbl{font-size:13px;color:var(--muted);min-width:70px}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap}
+.setting-row:last-child{border-bottom:none}
+.setting-row .lbl{font-size:14px}
+.setting-row .sub{font-size:11px;color:var(--muted);margin-top:3px}
+.theme-colors{display:flex;gap:8px;padding:10px 0;flex-wrap:wrap}
+.color-dot{width:32px;height:32px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:.2s}
+.color-dot.active{border-color:var(--text);transform:scale(1.1)}
+
+.help-tabs{display:flex;gap:4px;margin-bottom:16px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+.help-tabs::-webkit-scrollbar{display:none}
+.help-tab{padding:8px 14px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;font-size:12px;white-space:nowrap;flex-shrink:0}
+.help-tab.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;font-weight:600}
+.help-body{font-size:13.5px;line-height:1.9}
+.help-body h4{font-size:15px;margin-bottom:10px}
+.help-body p{color:var(--muted);margin-bottom:12px}
+.help-body ul{list-style:none;padding:0}
+.help-body li{padding:8px 24px 8px 0;position:relative;color:var(--text);font-size:13px;border-bottom:1px solid var(--border)}
+.help-body li:last-child{border-bottom:none}
+.help-body li::before{content:'▸';position:absolute;right:4px;color:var(--accent);font-weight:700}
+.help-body li b{color:var(--accent)}
+
+#focusOverlay{position:fixed;inset:0;background:#000;z-index:200;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:20px}
+#focusOverlay .f-time{font-size:80px;font-weight:800;color:#fff;letter-spacing:3px;margin-bottom:10px}
+#focusOverlay .f-mode{font-size:16px;color:#888;letter-spacing:4px;margin-bottom:40px}
+#focusOverlay .f-controls{display:flex;gap:14px}
+#focusOverlay button{padding:16px 32px;border-radius:16px;border:none;cursor:pointer;font-family:inherit;font-size:16px;font-weight:700;background:#fff;color:#000}
+#focusOverlay button.ghost{background:transparent;color:#fff;border:1px solid #333}
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "vue": "https://cdn.jsdelivr.net/npm/vue@3/dist/vue.esm-browser.js"
+  }
+}
+</script>
+</head>
+<body>
+<div id="app"></div>
+
+<script type="module">
+import { createApp, reactive, ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
+
+/* ========== Helpers ========== */
+const $ = s => document.querySelector(s);
+const faDigits = s => String(s).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+const todayKey = (d) => {
+  const x = d || new Date();
+  return new Date(x.getTime() - x.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+};
+const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+const DB = {
+  get(k, d) {
+    try { return JSON.parse(localStorage.getItem('sb_' + k)) ?? d; }
+    catch { return d; }
+  },
+  set(k, v) {
+    try { localStorage.setItem('sb_' + k, JSON.stringify(v)); }
+    catch (e) { if (e.name === 'QuotaExceededError') console.warn('Storage پر شد'); }
+  },
+  remove(k) { try { localStorage.removeItem('sb_' + k); } catch {} }
+};
+
+const DEFAULT_SETTINGS = {
+  theme: 'dark', accent: 'purple', sound: 'bell',
+  goals: { tasks: 5, habits: 3, pomo: 4 }
+};
+
+/* ========== Store ========== */
+const store = reactive({
+  tasks: DB.get('tasks', []),
+  habits: DB.get('habits', []),
+  notes: DB.get('notes', []),
+  pomo: DB.get('pomo', { today: todayKey(), todayCount: 0, total: 0, minutes: 0 }),
+  settings: { ...DEFAULT_SETTINGS, ...DB.get('settings', {}) },
+
+  save() {
+    DB.set('tasks', this.tasks);
+    DB.set('habits', this.habits);
+    DB.set('notes', this.notes);
+    DB.set('pomo', this.pomo);
+    DB.set('settings', this.settings);
+  },
+  applyTheme() {
+    document.documentElement.setAttribute('data-theme', this.settings.theme);
+    document.documentElement.setAttribute('data-accent', this.settings.accent || 'purple');
+  },
+  toggleTheme() {
+    this.settings.theme = this.settings.theme === 'dark' ? 'light' : 'dark';
+    this.save(); this.applyTheme();
+  },
+  toggleTask(id) {
+    const t = this.tasks.find(x => x.id === id);
+    if (!t) return;
+    t.done = !t.done;
+    t.doneAt = t.done ? todayKey() : null;
+    this.save();
+  },
+  deleteTask(id) { this.tasks = this.tasks.filter(x => x.id !== id); this.save(); },
+  addTask(title, prio) {
+    if (!title.trim()) return;
+    this.tasks.unshift({
+      id: Date.now() + '', title: title.trim(), prio: prio || 'med',
+      done: false, createdAt: todayKey(), doneAt: null,
+      reminder: null, reminderOn: false, lastReminded: null
+    });
+    this.save();
+  },
+  addHabit(name) {
+    if (!name.trim()) return;
+    this.habits.unshift({ id: Date.now() + '', name: name.trim(), days: {} });
+    this.save();
+  },
+  toggleHabitDay(id, key) {
+    const h = this.habits.find(x => x.id === id);
+    if (!h) return;
+    if (h.days[key]) delete h.days[key]; else h.days[key] = true;
+    this.save();
+  },
+  deleteHabit(id) { this.habits = this.habits.filter(x => x.id !== id); this.save(); },
+  saveNote(note) {
+    if (note.id) {
+      const n = this.notes.find(x => x.id === note.id);
+      if (n) Object.assign(n, note);
+    } else {
+      this.notes.unshift({
+        id: Date.now() + '', title: note.title, body: note.body,
+        date: new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date()),
+        createdAt: todayKey()
+      });
+    }
+    this.save();
+  },
+  deleteNote(id) { this.notes = this.notes.filter(x => x.id !== id); this.save(); }
+});
+
+/* ========== Utils ========== */
+const DAY_NAMES = ['ی', 'د', 'س', 'چ', 'پ', 'ج', 'ش'];
+function last7Days() {
+  const arr = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    arr.push({ key: todayKey(d), jsDay: d.getDay(), num: d.getDate() });
+  }
+  return arr;
+}
+function calcStreak(h) {
+  let s = 0; const d = new Date();
+  while (true) {
+    const k = todayKey(d);
+    if (h.days[k]) { s++; d.setDate(d.getDate() - 1); } else break;
+    if (s > 365) break;
+  }
+  return s;
+}
+
+/* ========== MODALS ========== */
+const modals = reactive({
+  help: false, helpSection: 'tasks',
+  settings: false,
+  weather: false,
+  snapshots: false,
+  calDay: null,
+  note: null,
+  taskDetail: null,
+  focus: false
+});
+
+/* ========== HELP DATA ========== */
+const HELP_DATA = {
+  tasks: { icon: '✅', title: 'کارها', intro: 'کارهای روزانه‌ت رو اینجا مدیریت می‌کنی.', points: [
+    '<b>افزودن:</b> بنویس و Enter بزن', '<b>اولویت:</b> 🔴 بالا، 🟡 متوسط، 🟢 پایین',
+    '<b>تیک:</b> روی مربع بزن', '<b>یادآور ⏰:</b> روی آیکون ساعت', '<b>حذف:</b> دکمه ✕'
+  ]},
+  habits: { icon: '🎯', title: 'عادت‌ها', intro: 'عادت‌های روزانه‌ت رو ترکینگ کن.', points: [
+    '<b>ساخت:</b> اسم بنویس و + بزن', '<b>ترکینگ:</b> روی هر روز بزن',
+    '<b>استریک 🔥:</b> روزهای پشت‌سرهم', '<b>حذف:</b> دکمه ✕'
+  ]},
+  notes: { icon: '📝', title: 'یادداشت‌ها', intro: 'دفترچه شخصی.', points: [
+    '<b>جدید:</b> روی کادر بالا بزن', '<b>ویرایش:</b> روی هر یادداشت', '<b>تاریخ:</b> خودکار'
+  ]},
+  pomo: { icon: '🍅', title: 'پومودورو', intro: '۲۵ دقیقه تمرکز + ۵ دقیقه استراحت.', points: [
+    '<b>شروع:</b> دکمه شروع', '<b>حالت تمرکز 🌙:</b> تمام‌صفحه',
+    '<b>صدا:</b> از تنظیمات', '<b>ادامه:</b> حتی با رفرش'
+  ]},
+  calendar: { icon: '📅', title: 'تقویم', intro: 'تقویم شمسی با فعالیت‌ها.', points: [
+    '<b>ناوبری:</b> ‹ ›', '<b>مشاهده روز:</b> روی روز بزن', '<b>امروز:</b> با رنگ تم'
+  ]},
+  stats: { icon: '📊', title: 'آمار', intro: 'خلاصه فعالیت‌ها.', points: [
+    '<b>۴ کارت:</b> اعداد کلی', '<b>نمودار:</b> ۷ روز', '<b>دستاوردها 🏆:</b> ۱۶ تا',
+    '<b>اشتراک 📤:</b> عکس'
+  ]}
+};
+
+/* ========== COMPONENTS ========== */
+const AppHeader = {
+  setup() {
+    const clock = ref('--:--');
+    const date = ref('—');
+    const greet = ref('سلام');
+    const weather = ref({ temp: null, icon: '🌤' });
+
+    const tick = () => {
+      const now = new Date();
+      clock.value = faDigits(String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0'));
+      try { date.value = new Intl.DateTimeFormat('fa-IR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).format(now); }
+      catch { date.value = now.toLocaleDateString(); }
+      const h = now.getHours();
+      if (h < 5) greet.value = 'شب‌زنده‌داری؟ 🌙';
+      else if (h < 12) greet.value = 'صبح بخیر ☀️';
+      else if (h < 17) greet.value = 'ظهر بخیر 🌤';
+      else if (h < 20) greet.value = 'عصر بخیر 🌇';
+      else greet.value = 'شب بخیر 🌙';
+    };
+
+    const wIcon = (c) => {
+      if (c === 0) return '☀️'; if (c <= 3) return '🌤'; if (c <= 48) return '☁️';
+      if (c <= 67) return '🌧'; if (c <= 77) return '🌨'; if (c <= 82) return '🌧';
+      return '⛈';
+    };
+
+    const fetchWeather = async () => {
+      const cached = DB.get('weather', null);
+      if (cached && Date.now() - cached.time < 1800000) {
+        weather.value = { temp: Math.round(cached.data.current.temperature_2m), icon: wIcon(cached.data.current.weather_code) };
+        return;
+      }
+      try {
+        const url = 'https://api.open-meteo.com/v1/forecast?latitude=35.6892&longitude=51.3890&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m&timezone=Asia/Tehran';
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (!data?.current) throw new Error('Bad data');
+        DB.set('weather', { time: Date.now(), data });
+        weather.value = { temp: Math.round(data.current.temperature_2m), icon: wIcon(data.current.weather_code) };
+      } catch (e) {
+        if (cached?.data?.current) {
+          weather.value = { temp: Math.round(cached.data.current.temperature_2m), icon: wIcon(cached.data.current.weather_code) };
+        }
+      }
+    };
+
+    let timer;
+    onMounted(() => { tick(); fetchWeather(); timer = setInterval(tick, 1000); });
+    onUnmounted(() => clearInterval(timer));
+
+    return { store, modals, clock, date, greet, weather, faDigits };
+  },
+  template: `
+    <header class="glass app-header">
+      <div class="h-left">
+        <div class="h-top">
+          <span class="h-greet">{{ greet }}</span>
+          <button class="weather-mini" @click="modals.weather = true">
+            <span>{{ weather.icon }}</span>
+            <span>{{ weather.temp !== null ? faDigits(weather.temp) + '°' : '—' }}</span>
+          </button>
+        </div>
+        <div class="h-time">{{ clock }}</div>
+        <div class="h-date">{{ date }}</div>
+      </div>
+      <div class="h-actions">
+        <button class="icon-btn" @click="modals.help = true">❓</button>
+        <button class="icon-btn" @click="modals.settings = true">⚙️</button>
+        <button class="icon-btn" @click="store.toggleTheme()">{{ store.settings.theme === 'dark' ? '🌙' : '☀️' }}</button>
+      </div>
+    </header>
+  `
+};
+
+const BottomNav = {
+  props: { current: String },
+  emits: ['change'],
+  setup() {
+    const items = [
+      { id: 'tasks', title: 'کارها', icon: '✅' },
+      { id: 'habits', title: 'عادت', icon: '🎯' },
+      { id: 'notes', title: 'یادداشت', icon: '📝' },
+      { id: 'pomo', title: 'پومو', icon: '🍅' },
+      { id: 'calendar', title: 'تقویم', icon: '📅' },
+      { id: 'stats', title: 'آمار', icon: '📊' }
+    ];
+    return { items };
+  },
+  template: `
+    <nav class="bottom-nav">
+      <button v-for="item in items" :key="item.id"
+        :class="['nav-btn', { active: current === item.id }]"
+        @click="$emit('change', item.id)">
+        <span class="ni">{{ item.icon }}</span>
+        <span>{{ item.title }}</span>
+      </button>
+    </nav>
+  `
+};
+
+/* ===== TasksView ===== */
+const TasksView = {
+  setup() {
+    const input = ref('');
+    const prio = ref('med');
+    const add = () => { store.addTask(input.value, prio.value); input.value = ''; };
+    const total = computed(() => store.tasks.length);
+    const done = computed(() => store.tasks.filter(t => t.done).length);
+    const goals = computed(() => {
+      const g = store.settings.goals;
+      const today = todayKey();
+      const t = store.tasks.filter(x => x.done && x.doneAt === today).length;
+      const h = store.habits.filter(x => x.days[today]).length;
+      const p = store.pomo.today === today ? store.pomo.todayCount : 0;
+      return [
+        { icon: '✅', lbl: 'کار امروز', val: t, target: g.tasks },
+        { icon: '🎯', lbl: 'عادت امروز', val: h, target: g.habits },
+        { icon: '🍅', lbl: 'پومودورو', val: p, target: g.pomo }
+      ];
+    });
+    const openReminder = (task) => { modals.taskDetail = { ...task }; };
+    return { store, modals, input, prio, add, total, done, goals, faDigits, escapeHtml, openReminder };
+  },
+  template: `
+    <div class="section-title"><span>✅</span><span>کارهای امروز</span>
+      <button class="hint-btn" @click="modals.helpSection='tasks'; modals.help=true">?</button>
+    </div>
+    <div class="glass add-row">
+      <input v-model="input" @keyup.enter="add" placeholder="یه کار جدید..." maxlength="80">
+      <select v-model="prio">
+        <option value="high">🔴</option>
+        <option value="med">🟡</option>
+        <option value="low">🟢</option>
+      </select>
+      <button @click="add">+</button>
+    </div>
+
+    <div v-for="g in goals" :key="g.lbl" class="goal-card">
+      <div class="goal-head">
+        <span>{{ g.icon }} {{ g.lbl }}</span>
+        <b>{{ faDigits(g.val) }} / {{ faDigits(g.target) }}</b>
+      </div>
+      <div class="goal-bar">
+        <div class="goal-fill" :class="{done: g.val >= g.target}"
+          :style="{ width: Math.min(100, (g.val/g.target)*100) + '%' }"></div>
+      </div>
+    </div>
+
+    <div v-if="!store.tasks.length" class="empty">
+      <div class="empty-icon">🌸</div>
+      هنوز کاری نداری!
+    </div>
+    <div v-else>
+      <div v-for="t in store.tasks" :key="t.id" :class="['task', {done: t.done}]">
+        <div class="check" @click="store.toggleTask(t.id)"></div>
+        <div class="task-title">{{ t.title }}</div>
+        <span v-if="t.reminder && t.reminderOn" class="rmd-badge">⏰ {{ faDigits(t.reminder) }}</span>
+        <div :class="['prio', t.prio]"></div>
+        <button class="icon-xs" @click="openReminder(t)">⏰</button>
+        <button class="icon-xs del" @click="store.deleteTask(t.id)">✕</button>
+      </div>
+    </div>
+
+    <div v-if="store.tasks.length" class="stats-row">
+      <div class="stat-card"><div class="stat-num">{{ faDigits(total) }}</div><div class="stat-lbl">کل</div></div>
+      <div class="stat-card"><div class="stat-num">{{ faDigits(done) }}</div><div class="stat-lbl">انجام‌شده</div></div>
+      <div class="stat-card"><div class="stat-num">{{ faDigits(total - done) }}</div><div class="stat-lbl">باقی</div></div>
+    </div>
+  `
+};
+
+/* ===== HabitsView ===== */
+const HabitsView = {
+  setup() {
+    const input = ref('');
+    const add = () => { store.addHabit(input.value); input.value = ''; };
+    const days = last7Days();
+    const today = todayKey();
+    return { store, modals, input, add, days, today, DAY_NAMES, calcStreak, faDigits, escapeHtml };
+  },
+  template: `
+    <div class="section-title"><span>🎯</span><span>عادت‌های من</span>
+      <button class="hint-btn" @click="modals.helpSection='habits'; modals.help=true">?</button>
+    </div>
+    <div class="glass add-row">
+      <input v-model="input" @keyup.enter="add" placeholder="یه عادت جدید..." maxlength="40">
+      <button @click="add">+</button>
+    </div>
+
+    <div v-if="!store.habits.length" class="empty">
+      <div class="empty-icon">🎯</div>
+      هنوز عادتی نداری!
+    </div>
+    <div v-else>
+      <div v-for="h in store.habits" :key="h.id" class="habit">
+        <div class="habit-head">
+          <div class="habit-name">{{ h.name }}</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div v-if="calcStreak(h) > 0" class="habit-streak">🔥 {{ faDigits(calcStreak(h)) }}</div>
+            <button class="icon-xs del" @click="store.deleteHabit(h.id)">✕</button>
+          </div>
+        </div>
+        <div class="days">
+          <div v-for="d in days" :key="d.key"
+            :class="['day', { done: h.days[d.key], today: d.key === today }]"
+            @click="store.toggleHabitDay(h.id, d.key)">
+            <span class="dn">{{ DAY_NAMES[d.jsDay] }}</span>
+            <span class="dd">{{ faDigits(d.num) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+};
+
+/* ===== NotesView ===== */
+const NotesView = {
+  setup() {
+    const openNew = () => { modals.note = { id: null, title: '', body: '' }; };
+    const openEdit = (n) => { modals.note = { ...n }; };
+    return { store, modals, openNew, openEdit, escapeHtml };
+  },
+  template: `
+    <div class="section-title"><span>📝</span><span>یادداشت‌ها</span>
+      <button class="hint-btn" @click="modals.helpSection='notes'; modals.help=true">?</button>
+    </div>
+    <div class="glass add-row" style="cursor:pointer" @click="openNew">
+      <input placeholder="یادداشت جدید بنویس..." readonly style="cursor:pointer">
+      <button>+</button>
+    </div>
+
+    <div v-if="!store.notes.length" class="empty">
+      <div class="empty-icon">📝</div>
+      هنوز یادداشتی نداری!
+    </div>
+    <div v-else>
+      <div v-for="n in store.notes" :key="n.id" class="note" @click="openEdit(n)">
+        <div class="note-title">{{ n.title || 'بدون عنوان' }}</div>
+        <div class="note-body">{{ n.body.slice(0, 200) }}{{ n.body.length > 200 ? '...' : '' }}</div>
+        <div class="note-date">{{ n.date }}</div>
+      </div>
+    </div>
+  `
+};
+
+/* ===== PomoView ===== */
+const POMO_FOCUS = 25 * 60;
+const POMO_BREAK = 5 * 60;
+let pomoInterval = null;
+
+const pomoState = reactive({
+  mode: 'focus',
+  remaining: POMO_FOCUS,
+  running: false,
+  endAt: null
+});
+
+const POMO_KEY = 'pomoTimer';
+function savePomoState() {
+  DB.set(POMO_KEY, { mode: pomoState.mode, remaining: pomoState.remaining, running: pomoState.running, endAt: pomoState.endAt });
+}
+function clearPomoState() { DB.remove(POMO_KEY); }
+
+function playSound(type) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const t = ctx.currentTime;
+    const beep = (f, st, d, vol = 0.3, w = 'sine') => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = f; o.type = w;
+      g.gain.setValueAtTime(0.001, t + st);
+      g.gain.exponentialRampToValueAtTime(vol, t + st + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, t + st + d);
+      o.start(t + st); o.stop(t + st + d + 0.05);
+    };
+    if (type === 'bell') [880, 1108, 1318].forEach((f, i) => beep(f, i * 0.14, 0.5, 0.3));
+    else if (type === 'birds') { for (let i = 0; i < 5; i++) beep(1800 + i * 180, i * 0.09, 0.1, 0.15); beep(1500, 0.6, 0.25, 0.2); }
+    else if (type === 'synth') { beep(220, 0, 0.35, 0.2, 'sawtooth'); beep(330, 0.15, 0.4, 0.2, 'sawtooth'); beep(440, 0.3, 0.6, 0.25, 'sawtooth'); }
+    else { beep(800, 0, 0.1); beep(1000, 0.15, 0.1); beep(1200, 0.3, 0.2); }
+  } catch (e) {}
+}
+
+function finishPomo() {
+  if (pomoInterval) { clearInterval(pomoInterval); pomoInterval = null; }
+  pomoState.running = false; pomoState.endAt = null;
+  playSound(store.settings.sound || 'bell');
+  if (pomoState.mode === 'focus') {
+    store.pomo.todayCount++; store.pomo.total++; store.pomo.minutes += 25;
+    pomoState.mode = 'break'; pomoState.remaining = POMO_BREAK;
+  } else {
+    pomoState.mode = 'focus'; pomoState.remaining = POMO_FOCUS;
+  }
+  store.save();
+  savePomoState();
+}
+
+function startPomoInterval() {
+  if (pomoInterval) clearInterval(pomoInterval);
+  pomoInterval = setInterval(() => {
+    if (!pomoState.endAt) return;
+    const rem = Math.round((pomoState.endAt - Date.now()) / 1000);
+    pomoState.remaining = Math.max(0, rem);
+    if (pomoState.remaining <= 0) finishPomo();
+  }, 500);
+}
+
+function restorePomo() {
+  const s = DB.get(POMO_KEY, null);
+  if (!s || typeof s.remaining !== 'number') return;
+  pomoState.mode = s.mode === 'break' ? 'break' : 'focus';
+  pomoState.running = !!s.running;
+  if (pomoState.running && s.endAt) {
+    pomoState.remaining = Math.max(0, Math.round((s.endAt - Date.now()) / 1000));
+    pomoState.endAt = s.endAt;
+    if (pomoState.remaining <= 0) finishPomo();
+    else startPomoInterval();
+  } else {
+    pomoState.remaining = Math.max(1, Math.round(s.remaining || POMO_FOCUS));
+    pomoState.endAt = null;
+  }
+}
+
+const PomoView = {
+  setup() {
+    const fmt = computed(() => {
+      const m = Math.floor(pomoState.remaining / 60), s = pomoState.remaining % 60;
+      return faDigits(String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0'));
+    });
+    const deg = computed(() => {
+      const total = pomoState.mode === 'focus' ? POMO_FOCUS : POMO_BREAK;
+      return ((total - pomoState.remaining) / total) * 360;
+    });
+    const modeLabel = computed(() => pomoState.mode === 'focus' ? 'تمرکز' : 'استراحت');
+    const toggle = () => {
+      if (pomoState.running) {
+        if (pomoState.endAt) pomoState.remaining = Math.max(1, Math.round((pomoState.endAt - Date.now()) / 1000));
+        if (pomoInterval) { clearInterval(pomoInterval); pomoInterval = null; }
+        pomoState.running = false; pomoState.endAt = null;
+        savePomoState();
+      } else {
+        pomoState.running = true;
+        pomoState.endAt = Date.now() + pomoState.remaining * 1000;
+        savePomoState();
+        startPomoInterval();
+      }
+    };
+    const reset = () => {
+      if (pomoInterval) { clearInterval(pomoInterval); pomoInterval = null; }
+      pomoState.running = false; pomoState.endAt = null;
+      pomoState.mode = 'focus'; pomoState.remaining = POMO_FOCUS;
+      clearPomoState(); savePomoState();
+    };
+    return { store, modals, pomoState, fmt, deg, modeLabel, toggle, reset, faDigits };
+  },
+  template: `
+    <div class="section-title"><span>🍅</span><span>پومودورو</span>
+      <button class="hint-btn" @click="modals.helpSection='pomo'; modals.help=true">?</button>
+    </div>
+    <div class="glass pomo-wrap">
+      <div class="pomo-circle" :style="{ background: 'conic-gradient(var(--accent) ' + deg + 'deg, rgba(255,255,255,.05) ' + deg + 'deg)' }">
+        <div class="pomo-inner">
+          <div class="pomo-time">{{ fmt }}</div>
+          <div class="pomo-mode">{{ modeLabel }}</div>
+        </div>
+      </div>
+      <div class="pomo-controls">
+        <button class="pomo-btn" @click="toggle">{{ pomoState.running ? 'توقف' : 'شروع' }}</button>
+        <button class="pomo-btn secondary" @click="reset">ریست</button>
+        <button class="pomo-btn secondary" @click="modals.focus = true">🌙 تمرکز</button>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num">{{ faDigits(store.pomo.todayCount) }}</div><div class="stat-lbl">امروز</div></div>
+      <div class="stat-card"><div class="stat-num">{{ faDigits(store.pomo.total) }}</div><div class="stat-lbl">کل</div></div>
+      <div class="stat-card"><div class="stat-num">{{ faDigits(store.pomo.minutes) }}</div><div class="stat-lbl">دقیقه</div></div>
+    </div>
+  `
+};
+
+/* ===== CalendarView ===== */
+const PERSIAN_MONTHS = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+
+function getPersianDate(date) {
+  try {
+    const fmt = new Intl.DateTimeFormat('en-US-u-ca-persian', { year: 'numeric', month: 'numeric', day: 'numeric' });
+    const parts = fmt.formatToParts(date); const r = {};
+    parts.forEach(p => r[p.type] = p.value);
+    return { year: parseInt(r.year), month: parseInt(r.month), day: parseInt(r.day) };
+  } catch { return { year: 0, month: 0, day: 0 }; }
+}
+
+const CalendarView = {
+  setup() {
+    const viewDate = ref(new Date());
+    const data = computed(() => {
+      const p = getPersianDate(viewDate.value);
+      let start = new Date(viewDate.value);
+      for (let i = 0; i < 40; i++) {
+        const pp = getPersianDate(start);
+        if (pp.year === p.year && pp.month === p.month && pp.day === 1) break;
+        start.setDate(start.getDate() - 1);
+      }
+      const days = []; let d = new Date(start);
+      for (let i = 0; i < 32; i++) {
+        const pp = getPersianDate(d);
+        if (pp.year !== p.year || pp.month !== p.month) break;
+        days.push({ g: new Date(d), p: pp, key: todayKey(d), jsDay: d.getDay() });
+        d.setDate(d.getDate() + 1);
+      }
+      return { p, start, days };
+    });
+    const title = computed(() => `${PERSIAN_MONTHS[data.value.p.month - 1]} ${faDigits(data.value.p.year)}`);
+    const firstWd = computed(() => (data.value.start.getDay() + 1) % 7);
+    const today = todayKey();
+    const prev = () => { const s = data.value.start; viewDate.value = new Date(s); viewDate.value.setDate(viewDate.value.getDate() - 1); };
+    const next = () => { const ds = data.value.days; const last = ds[ds.length - 1].g; viewDate.value = new Date(last); viewDate.value.setDate(viewDate.value.getDate() + 1); };
+    const openDay = (key) => {
+      const tasks = store.tasks.filter(t => t.createdAt === key || t.doneAt === key);
+      const habits = store.habits.filter(h => h.days[key]);
+      const notes = store.notes.filter(n => n.createdAt === key);
+      modals.calDay = { key, tasks, habits, notes, title: new Intl.DateTimeFormat('fa-IR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(key)) };
+    };
+    return { store, modals, data, title, firstWd, today, prev, next, openDay, faDigits, escapeHtml };
+  },
+  template: `
+    <div class="section-title"><span>📅</span><span>تقویم شمسی</span>
+      <button class="hint-btn" @click="modals.helpSection='calendar'; modals.help=true">?</button>
+    </div>
+    <div class="cal-head glass">
+      <button @click="prev">‹</button>
+      <div class="cal-title">{{ title }}</div>
+      <button @click="next">›</button>
+    </div>
+    <div class="cal-weekdays"><div>ش</div><div>ی</div><div>د</div><div>س</div><div>چ</div><div>پ</div><div>ج</div></div>
+    <div class="cal-grid">
+      <div v-for="n in firstWd" :key="'e'+n" class="cal-day other"></div>
+      <div v-for="d in data.days" :key="d.key"
+        :class="['cal-day', { today: d.key === today,
+          has: store.tasks.some(t => t.createdAt === d.key || t.doneAt === d.key) || store.habits.some(h => h.days[d.key]) || store.notes.some(n => n.createdAt === d.key)
+        }]"
+        @click="openDay(d.key)">
+        <span>{{ faDigits(d.p.day) }}</span>
+        <div class="dots">
+          <span v-if="store.tasks.some(t => t.createdAt === d.key || t.doneAt === d.key)" class="dot t"></span>
+          <span v-if="store.habits.some(h => h.days[d.key])" class="dot h"></span>
+          <span v-if="store.notes.some(n => n.createdAt === d.key)" class="dot n"></span>
+        </div>
+      </div>
+    </div>
+  `
+};
+
+/* ===== Achievements ===== */
+const ACHIEVEMENTS = [
+  { id: 'first_task', icon: '🌱', title: 'شروع‌کننده', desc: 'اولین کار', check: s => s.tasks.length >= 1 },
+  { id: 'task_10', icon: '💪', title: 'کارآزموده', desc: '۱۰ کار', check: s => s.tasks.length >= 10 },
+  { id: 'task_30', icon: '📚', title: 'کاربلد', desc: '۳۰ کار', check: s => s.tasks.length >= 30 },
+  { id: 'done_10', icon: '✅', title: 'تمام‌کننده', desc: '۱۰ انجام', check: s => s.tasks.filter(t => t.done).length >= 10 },
+  { id: 'done_50', icon: '🎖', title: 'افسانه‌ای', desc: '۵۰ انجام', check: s => s.tasks.filter(t => t.done).length >= 50 },
+  { id: 'first_habit', icon: '🎯', title: 'عادت‌ساز', desc: 'اولین عادت', check: s => s.habits.length >= 1 },
+  { id: 'habit_3', icon: '🌿', title: 'پرورش‌دهنده', desc: '۳ عادت', check: s => s.habits.length >= 3 },
+  { id: 'streak_3', icon: '🔥', title: 'گرم‌شده', desc: '۳ روز استریک', check: s => s.habits.some(h => calcStreak(h) >= 3) },
+  { id: 'streak_7', icon: '⚡', title: 'آتشین', desc: '۷ روز استریک', check: s => s.habits.some(h => calcStreak(h) >= 7) },
+  { id: 'streak_30', icon: '💎', title: 'الماس', desc: '۳۰ روز استریک', check: s => s.habits.some(h => calcStreak(h) >= 30) },
+  { id: 'first_note', icon: '📝', title: 'نویسنده', desc: 'اولین یادداشت', check: s => s.notes.length >= 1 },
+  { id: 'note_10', icon: '📔', title: 'دفترچه‌دار', desc: '۱۰ یادداشت', check: s => s.notes.length >= 10 },
+  { id: 'pomo_1', icon: '🍅', title: 'اولین تمرکز', desc: '۱ پومو', check: s => s.pomo.total >= 1 },
+  { id: 'pomo_5', icon: '🧠', title: 'متمرکز', desc: '۵ پومو', check: s => s.pomo.total >= 5 },
+  { id: 'pomo_25', icon: '🚀', title: 'مغز متفکر', desc: '۲۵ پومو', check: s => s.pomo.total >= 25 },
+  { id: 'pomo_100', icon: '👑', title: 'استاد تمرکز', desc: '۱۰۰ پومو', check: s => s.pomo.total >= 100 }
+];
+
+const StatsView = {
+  setup() {
+    const totalDone = computed(() => store.tasks.filter(t => t.done).length);
+    const bestStreak = computed(() => store.habits.length ? Math.max(...store.habits.map(calcStreak)) : 0);
+    const days = last7Days();
+    const tasksByDay = computed(() => {
+      const m = {}; days.forEach(d => m[d.key] = 0);
+      store.tasks.forEach(t => { if (t.done && t.doneAt && m[t.doneAt] !== undefined) m[t.doneAt]++; });
+      return m;
+    });
+    const habitsByDay = computed(() => {
+      const m = {}; days.forEach(d => m[d.key] = 0);
+      store.habits.forEach(h => Object.keys(h.days).forEach(k => { if (m[k] !== undefined) m[k]++; }));
+      return m;
+    });
+    const maxT = computed(() => Math.max(1, ...Object.values(tasksByDay.value)));
+    const maxH = computed(() => Math.max(1, ...Object.values(habitsByDay.value)));
+    const unlockedCount = computed(() => ACHIEVEMENTS.filter(a => a.check(store)).length);
+
+    const shareStats = () => {
+      const c = document.createElement('canvas'); c.width = 800; c.height = 1000;
+      const ctx = c.getContext('2d');
+      const grad = ctx.createLinearGradient(0, 0, 800, 1000);
+      grad.addColorStop(0, '#0a0a1a'); grad.addColorStop(1, '#131328');
+      ctx.fillStyle = grad; ctx.fillRect(0, 0, 800, 1000);
+      ctx.textAlign = 'center'; ctx.direction = 'rtl';
+      ctx.fillStyle = '#f1f5f9'; ctx.font = 'bold 48px Vazirmatn, sans-serif';
+      ctx.fillText('🧠 مغز من', 400, 90);
+      ctx.fillStyle = '#94a3b8'; ctx.font = '22px Vazirmatn, sans-serif';
+      const ds = new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date());
+      ctx.fillText(ds, 400, 130);
+      const cards = [
+        { icon: '✅', val: totalDone.value, lbl: 'کار انجام‌شده' },
+        { icon: '🎯', val: bestStreak.value, lbl: 'بهترین استریک' },
+        { icon: '🍅', val: store.pomo.total, lbl: 'پومودورو' },
+        { icon: '📝', val: store.notes.length, lbl: 'یادداشت' }
+      ];
+      cards.forEach((card, i) => {
+        const x = 50 + (i % 2) * 370, y = 220 + Math.floor(i / 2) * 220;
+        ctx.fillStyle = 'rgba(255,255,255,.06)';
+        ctx.beginPath(); ctx.roundRect(x, y, 350, 180, 24); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,.1)'; ctx.lineWidth = 1; ctx.stroke();
+        ctx.font = '52px sans-serif'; ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+        ctx.fillText(card.icon, x + 175, y + 70);
+        ctx.fillStyle = '#8b5cf6'; ctx.font = 'bold 48px Vazirmatn, sans-serif';
+        ctx.fillText(faDigits(card.val), x + 175, y + 130);
+        ctx.fillStyle = '#94a3b8'; ctx.font = '18px Vazirmatn, sans-serif';
+        ctx.fillText(card.lbl, x + 175, y + 165);
+      });
+      ctx.fillStyle = '#f1f5f9'; ctx.font = 'bold 26px Vazirmatn, sans-serif';
+      ctx.fillText(`🏆 ${faDigits(unlockedCount.value)} از ${faDigits(ACHIEVEMENTS.length)}`, 400, 720);
+      ctx.fillStyle = '#94a3b8'; ctx.font = '16px Vazirmatn, sans-serif';
+      ctx.fillText('github.com/MMN-software/second-brain', 400, 770);
+      const pct = unlockedCount.value / ACHIEVEMENTS.length;
+      ctx.fillStyle = 'rgba(255,255,255,.08)';
+      ctx.beginPath(); ctx.roundRect(100, 800, 600, 24, 12); ctx.fill();
+      const bg = ctx.createLinearGradient(100, 0, 700, 0);
+      bg.addColorStop(0, '#8b5cf6'); bg.addColorStop(1, '#06b6d4');
+      ctx.fillStyle = bg;
+      ctx.beginPath(); ctx.roundRect(100, 800, 600 * pct, 24, 12); ctx.fill();
+      ctx.fillStyle = '#f1f5f9'; ctx.font = 'bold 20px Vazirmatn, sans-serif';
+      ctx.fillText(`${faDigits(Math.round(pct * 100))}%`, 400, 880);
+      c.toBlob(async blob => {
+        const file = new File([blob], 'stats.png', { type: 'image/png' });
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          try { await navigator.share({ files: [file], title: 'آمار مغز من' }); } catch (e) {}
+        } else {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a'); a.href = url; a.download = 'stats.png'; a.click();
+          URL.revokeObjectURL(url);
+        }
+      });
+    };
+    return { store, modals, totalDone, bestStreak, days, tasksByDay, habitsByDay, maxT, maxH, ACHIEVEMENTS, DAY_NAMES, faDigits, shareStats, calcStreak };
+  },
+  template: `
+    <div class="section-title"><span>📊</span><span>آمار</span>
+      <button class="hint-btn" @click="modals.helpSection='stats'; modals.help=true">?</button>
+    </div>
+    <div class="big-stats">
+      <div class="big-stat"><div class="bs-icon">✅</div><div class="bs-val">{{ faDigits(totalDone) }}</div><div class="bs-lbl">کار انجام‌شده</div></div>
+      <div class="big-stat"><div class="bs-icon">🎯</div><div class="bs-val">{{ faDigits(bestStreak) }}</div><div class="bs-lbl">بهترین استریک</div></div>
+      <div class="big-stat"><div class="bs-icon">🍅</div><div class="bs-val">{{ faDigits(store.pomo.total) }}</div><div class="bs-lbl">پومودورو کل</div></div>
+      <div class="big-stat"><div class="bs-icon">📝</div><div class="bs-val">{{ faDigits(store.notes.length) }}</div><div class="bs-lbl">یادداشت</div></div>
+    </div>
+    <button class="btn-sm" style="width:100%;margin-bottom:14px;padding:12px" @click="shareStats">📤 اشتراک‌گذاری آمار به‌صورت تصویر</button>
+
+    <div class="chart-wrap">
+      <div class="chart-title">کارهای انجام‌شده در ۷ روز گذشته</div>
+      <div class="chart">
+        <div v-for="d in days" :key="d.key" class="bar" :style="{ height: Math.max(3, (tasksByDay[d.key]/maxT)*100) + '%' }">
+          <div class="val">{{ faDigits(tasksByDay[d.key]) }}</div>
+          <div class="lbl">{{ DAY_NAMES[d.jsDay] }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-title">فعالیت عادت‌ها در ۷ روز گذشته</div>
+      <div class="chart">
+        <div v-for="d in days" :key="d.key" class="bar" :style="{ height: Math.max(3, (habitsByDay[d.key]/maxH)*100) + '%' }">
+          <div class="val">{{ faDigits(habitsByDay[d.key]) }}</div>
+          <div class="lbl">{{ DAY_NAMES[d.jsDay] }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:24px"><span>🏆</span><span>دستاوردها</span></div>
+    <div class="ach-grid">
+      <div v-for="a in ACHIEVEMENTS" :key="a.id" :class="['ach', { unlocked: a.check(store) }]">
+        <div class="ach-icon">{{ a.icon }}</div>
+        <div class="ach-title">{{ a.title }}</div>
+        <div class="ach-desc">{{ a.desc }}</div>
+      </div>
+    </div>
+  `
+};
+
+/* ===== Modals ===== */
+const NoteModal = {
+  setup() {
+    const title = ref(''), body = ref('');
+    watch(() => modals.note, (v) => {
+      if (v) { title.value = v.title || ''; body.value = v.body || ''; }
+    }, { immediate: true });
+    const save = () => {
+      if (!title.value.trim() && !body.value.trim()) { modals.note = null; return; }
+      store.saveNote({ id: modals.note.id, title: title.value.trim(), body: body.value.trim() });
+      modals.note = null;
+    };
+    const remove = () => {
+      if (modals.note.id && confirm('این یادداشت حذف بشه؟')) {
+        store.deleteNote(modals.note.id);
+        modals.note = null;
+      }
+    };
+    return { modals, title, body, save, remove };
+  },
+  template: `
+    <div class="modal-bg" v-if="modals.note" @click.self="modals.note = null">
+      <div class="modal">
+        <h3>{{ modals.note.id ? 'ویرایش یادداشت' : 'یادداشت جدید' }}</h3>
+        <input v-model="title" placeholder="عنوان">
+        <textarea v-model="body" placeholder="متن یادداشت..."></textarea>
+        <div class="modal-actions">
+          <button class="btn-ghost" @click="modals.note = null">لغو</button>
+          <button v-if="modals.note.id" class="btn-ghost" style="color:var(--danger)" @click="remove">حذف</button>
+          <button class="btn-primary" @click="save">ذخیره</button>
+        </div>
+      </div>
+    </div>
+  `
+};
+
+const TaskDetailModal = {
+  setup() {
+    const time = ref('');
+    const on = ref(false);
+    watch(() => modals.taskDetail, (v) => {
+      if (v) { time.value = v.reminder || ''; on.value = !!v.reminderOn; }
+    }, { immediate: true });
+    const save = () => {
+      const t = store.tasks.find(x => x.id === modals.taskDetail.id);
+      if (!t) return;
+      if (on.value && !time.value) { alert('اول ساعت رو مشخص کن'); return; }
+      t.reminder = time.value;
+      t.reminderOn = on.value;
+      t.lastReminded = null;
+      store.save();
+      modals.taskDetail = null;
+    };
+    const remove = () => {
+      const t = store.tasks.find(x => x.id === modals.taskDetail.id);
+      if (!t) return;
+      t.reminder = null; t.reminderOn = false; t.lastReminded = null;
+      store.save();
+      modals.taskDetail = null;
+    };
+    return { modals, time, on, save, remove };
+  },
+  template: `
+    <div class="modal-bg" v-if="modals.taskDetail" @click.self="modals.taskDetail = null">
+      <div class="modal">
+        <h3>⏰ یادآور</h3>
+        <div class="td-row"><span class="lbl">ساعت</span><input type="time" v-model="time" style="flex:1;margin:0"></div>
+        <div class="td-row"><span class="lbl" style="min-width:auto">فعال باشد</span><input type="checkbox" v-model="on" style="width:auto;margin:0"></div>
+        <div class="modal-actions">
+          <button class="btn-ghost" @click="remove">حذف یادآور</button>
+          <button class="btn-primary" @click="save">ذخیره</button>
+        </div>
+        <div class="modal-actions"><button class="btn-ghost" style="width:100%" @click="modals.taskDetail = null">بستن</button></div>
+      </div>
+    </div>
+  `
+};
+
+const HelpModal = {
+  setup() {
+    const tabs = Object.keys(HELP_DATA);
+    const body = computed(() => HELP_DATA[modals.helpSection] || HELP_DATA.tasks);
+    return { modals, tabs, body, HELP_DATA };
+  },
+  template: `
+    <div class="modal-bg" v-if="modals.help" @click.self="modals.help = false">
+      <div class="modal">
+        <h3>📖 راهنمای اپ</h3>
+        <div class="help-tabs">
+          <button v-for="k in tabs" :key="k" :class="['help-tab', { active: modals.helpSection === k }]"
+            @click="modals.helpSection = k">
+            {{ HELP_DATA[k].icon }} {{ HELP_DATA[k].title }}
+          </button>
+        </div>
+        <div class="help-body">
+          <h4>{{ body.icon }} {{ body.title }}</h4>
+          <p>{{ body.intro }}</p>
+          <ul><li v-for="(p, i) in body.points" :key="i" v-html="p"></li></ul>
+        </div>
+        <div class="modal-actions" style="margin-top:16px">
+          <button class="btn-primary" @click="modals.help = false">متوجه شدم</button>
+        </div>
+      </div>
+    </div>
+  `
+};
+
+const ACCENTS = [
+  { id: 'purple', c1: '#8b5cf6', c2: '#06b6d4' },
+  { id: 'blue', c1: '#3b82f6', c2: '#06b6d4' },
+  { id: 'pink', c1: '#ec4899', c2: '#f43f5e' },
+  { id: 'green', c1: '#10b981', c2: '#84cc16' },
+  { id: 'orange', c1: '#f97316', c2: '#eab308' },
+  { id: 'red', c1: '#ef4444', c2: '#f59e0b' }
+];
+
+const SettingsModal = {
+  setup() {
+    const goalTasks = ref(5), goalHabits = ref(3), goalPomo = ref(4);
+    const sound = ref('bell');
+    const notifStatus = ref('⏳ غیرفعال');
+
+    watch(() => modals.settings, (v) => {
+      if (v) {
+        goalTasks.value = store.settings.goals.tasks;
+        goalHabits.value = store.settings.goals.habits;
+        goalPomo.value = store.settings.goals.pomo;
+        sound.value = store.settings.sound || 'bell';
+        updateNotifStatus();
+      }
+    });
+
+    const updateNotifStatus = () => {
+      if (!('Notification' in window)) { notifStatus.value = 'پشتیبانی نمی‌شه'; return; }
+      const p = Notification.permission;
+      notifStatus.value = p === 'granted' ? '✅ فعال' : p === 'denied' ? '❌ رد شده' : '⏳ غیرفعال';
+    };
+
+    const setAccent = (id) => { store.settings.accent = id; store.save(); store.applyTheme(); };
+
+    const saveGoals = () => {
+      store.settings.goals = {
+        tasks: Math.max(1, Math.min(50, parseInt(goalTasks.value) || 5)),
+        habits: Math.max(1, Math.min(20, parseInt(goalHabits.value) || 3)),
+        pomo: Math.max(1, Math.min(20, parseInt(goalPomo.value) || 4))
+      };
+      store.save();
+    };
+
+    const changeSound = () => { store.settings.sound = sound.value; store.save(); playSound(sound.value); };
+
+    const requestNotif = async () => {
+      if (!('Notification' in window)) { alert('مرورگرت پشتیبانی نمی‌کنه'); return; }
+      const p = await Notification.requestPermission();
+      updateNotifStatus();
+      alert(p === 'granted' ? '✅ فعال شد' : '❌ اجازه داده نشد');
+    };
+
+    const exportData = () => {
+      try {
+        const data = { version: 2, exportedAt: new Date().toISOString(), state: { tasks: store.tasks, habits: store.habits, notes: store.notes, pomo: store.pomo, settings: store.settings } };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `second-brain-${todayKey()}.json`; a.click();
+        URL.revokeObjectURL(url);
+      } catch (e) { alert('❌ خطا: ' + e.message); }
+    };
+
+    const importFile = ref(null);
+    const triggerImport = () => { importFile.value.value = ''; importFile.value.click(); };
+    const onImport = (e) => {
+      const f = e.target.files[0]; if (!f) return;
+      const r = new FileReader();
+      r.onload = ev => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          if (!data?.state || typeof data.state !== 'object') throw new Error('ساختار معتبر نیست');
+          const s = data.state;
+          if (!Array.isArray(s.tasks)) s.tasks = [];
+          if (!Array.isArray(s.habits)) s.habits = [];
+          if (!Array.isArray(s.notes)) s.notes = [];
+          if (!s.settings || typeof s.settings !== 'object') s.settings = {};
+          const d = DEFAULT_SETTINGS;
+          if (!['dark','light'].includes(s.settings.theme)) s.settings.theme = d.theme;
+          if (!['purple','blue','pink','green','orange','red'].includes(s.settings.accent)) s.settings.accent = d.accent;
+          if (!['bell','birds','synth','beep'].includes(s.settings.sound)) s.settings.sound = d.sound;
+          if (!s.settings.goals) s.settings.goals = { ...d.goals };
+          if (!s.pomo || typeof s.pomo !== 'object') s.pomo = { today: todayKey(), todayCount: 0, total: 0, minutes: 0 };
+
+          if (!confirm('داده‌های فعلی جایگزین بشن؟')) return;
+          store.tasks = s.tasks; store.habits = s.habits; store.notes = s.notes;
+          store.pomo = s.pomo; store.settings = { ...DEFAULT_SETTINGS, ...s.settings };
+          store.save(); store.applyTheme();
+          alert('✅ بازیابی شد');
+          modals.settings = false;
+        } catch (err) { alert('❌ فایل معتبر نیست: ' + err.message); }
+      };
+      r.readAsText(f);
+    };
+
+    const clearAll = () => {
+      if (!confirm('⚠️ همه‌ی داده‌ها پاک بشن؟')) return;
+      if (!confirm('مطمئنی؟ برگشت‌ناپذیره!')) return;
+      ['tasks','habits','notes','pomo','snapshots','weather','settings'].forEach(k => DB.remove(k));
+      clearPomoState();
+      store.tasks = []; store.habits = []; store.notes = [];
+      store.pomo = { today: todayKey(), todayCount: 0, total: 0, minutes: 0 };
+      store.settings = { ...DEFAULT_SETTINGS };
+      store.save(); store.applyTheme();
+      if (pomoInterval) { clearInterval(pomoInterval); pomoInterval = null; }
+      pomoState.running = false; pomoState.endAt = null;
+      pomoState.mode = 'focus'; pomoState.remaining = POMO_FOCUS;
+      savePomoState();
+      alert('🗑 پاک شد');
+      modals.settings = false;
+    };
+
+    return { store, modals, ACCENTS, goalTasks, goalHabits, goalPomo, sound, notifStatus, setAccent, saveGoals, changeSound, requestNotif, exportData, importFile, triggerImport, onImport, clearAll };
+  },
+  template: `
+    <div class="modal-bg" v-if="modals.settings" @click.self="modals.settings = false">
+      <div class="modal">
+        <h3>⚙️ تنظیمات</h3>
+
+        <div class="setting-row" style="border:none">
+          <div><div class="lbl">🎨 رنگ تم</div></div>
+        </div>
+        <div class="theme-colors">
+          <div v-for="a in ACCENTS" :key="a.id" :class="['color-dot', { active: store.settings.accent === a.id }]"
+            :style="{ background: 'linear-gradient(135deg, ' + a.c1 + ', ' + a.c2 + ')' }"
+            @click="setAccent(a.id)"></div>
+        </div>
+
+        <div class="setting-row" style="border-top:1px solid var(--border)">
+          <div><div class="lbl">🎯 اهداف روزانه</div></div>
+        </div>
+        <div class="td-row"><span class="lbl">✅ تسک</span><input type="number" v-model.number="goalTasks" min="1" max="50" @change="saveGoals" style="flex:1;margin:0"></div>
+        <div class="td-row"><span class="lbl">🎯 عادت</span><input type="number" v-model.number="goalHabits" min="1" max="20" @change="saveGoals" style="flex:1;margin:0"></div>
+        <div class="td-row"><span class="lbl">🍅 پومو</span><input type="number" v-model.number="goalPomo" min="1" max="20" @change="saveGoals" style="flex:1;margin:0"></div>
+
+        <div class="setting-row" style="border-top:1px solid var(--border)">
+          <div><div class="lbl">🎵 صدای پومودورو</div></div>
+          <select v-model="sound" @change="changeSound" style="width:auto;margin:0">
+            <option value="bell">زنگ</option>
+            <option value="birds">پرنده</option>
+            <option value="synth">سینتی‌سایزر</option>
+            <option value="beep">بیپ</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="lbl">🔔 نوتیفیکیشن</div><div class="sub">{{ notifStatus }}</div></div>
+          <button class="btn-sm" @click="requestNotif">فعال‌سازی</button>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="lbl">💾 پشتیبان‌گیری</div></div>
+          <button class="btn-sm" @click="exportData">دانلود</button>
+        </div>
+        <div class="setting-row">
+          <div><div class="lbl">📥 بازیابی</div></div>
+          <button class="btn-sm" @click="triggerImport">انتخاب</button>
+          <input ref="importFile" type="file" accept=".json" style="display:none" @change="onImport">
+        </div>
+        <div class="setting-row">
+          <div><div class="lbl" style="color:var(--danger)">🗑 پاک کردن همه‌چیز</div></div>
+          <button class="btn-sm danger" @click="clearAll">پاک کن</button>
+        </div>
+
+        <div class="modal-actions" style="margin-top:16px">
+          <button class="btn-ghost" @click="modals.settings = false">بستن</button>
+        </div>
+      </div>
+    </div>
+  `
+};
+
+const WeatherModal = {
+  setup() {
+    const data = computed(() => {
+      const cached = DB.get('weather', null);
+      return cached?.data?.current || null;
+    });
+    const wIcon = (c) => {
+      if (c === 0) return '☀️'; if (c <= 3) return '🌤'; if (c <= 48) return '☁️';
+      if (c <= 67) return '🌧'; if (c <= 77) return '🌨'; if (c <= 82) return '🌧';
+      return '⛈';
+    };
+    return { modals, data, wIcon, faDigits };
+  },
+  template: `
+    <div class="modal-bg" v-if="modals.weather" @click.self="modals.weather = false">
+      <div class="modal">
+        <h3>🌤 آب‌وهوا</h3>
+        <div v-if="data" style="text-align:center;padding:14px 0">
+          <div style="font-size:60px;margin-bottom:10px">{{ wIcon(data.weather_code) }}</div>
+          <div style="font-size:34px;font-weight:800;color:var(--accent)">{{ faDigits(Math.round(data.temperature_2m)) }}°C</div>
+          <div style="color:var(--muted);margin-top:6px">تهران</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px">
+            <div class="stat-card"><div class="stat-num">{{ faDigits(Math.round(data.wind_speed_10m)) }}</div><div class="stat-lbl">باد (km/h)</div></div>
+            <div class="stat-card"><div class="stat-num">{{ faDigits(data.relative_humidity_2m) }}%</div><div class="stat-lbl">رطوبت</div></div>
+          </div>
+        </div>
+        <div v-else class="empty"><div class="empty-icon">🌫</div>داده آب‌وهوا در دسترس نیست</div>
+        <div class="modal-actions"><button class="btn-ghost" style="width:100%" @click="modals.weather = false">بستن</button></div>
+      </div>
+    </div>
+  `
+};
+
+const CalDayModal = {
+  setup() {
+    return { modals, escapeHtml };
+  },
+  template: `
+    <div class="modal-bg" v-if="modals.calDay" @click.self="modals.calDay = null">
+      <div class="modal">
+        <h3>{{ modals.calDay.title }}</h3>
+        <div v-if="modals.calDay.tasks.length">
+          <div class="section-title" style="margin:10px 0 6px"><span>✅</span><span>کارها</span></div>
+          <div v-for="t in modals.calDay.tasks" :key="t.id" class="task">
+            <div class="task-title">{{ t.title }}</div>
+          </div>
+        </div>
+        <div v-if="modals.calDay.habits.length">
+          <div class="section-title" style="margin:10px 0 6px"><span>🎯</span><span>عادت‌ها</span></div>
+          <div v-for="h in modals.calDay.habits" :key="h.id" class="task">
+            <div class="task-title">{{ h.name }}</div>
+          </div>
+        </div>
+        <div v-if="modals.calDay.notes.length">
+          <div class="section-title" style="margin:10px 0 6px"><span>📝</span><span>یادداشت</span></div>
+          <div v-for="n in modals.calDay.notes" :key="n.id" class="note">
+            <div class="note-title">{{ n.title || 'بدون عنوان' }}</div>
+          </div>
+        </div>
+        <div v-if="!modals.calDay.tasks.length && !modals.calDay.habits.length && !modals.calDay.notes.length" class="empty">
+          فعالیتی ثبت نشده
+        </div>
+        <div class="modal-actions" style="margin-top:16px">
+          <button class="btn-ghost" style="width:100%" @click="modals.calDay = null">بستن</button>
+        </div>
+      </div>
+    </div>
+  `
+};
+
+const FocusOverlay = {
+  setup() {
+    const fmt = computed(() => {
+      const m = Math.floor(pomoState.remaining / 60), s = pomoState.remaining % 60;
+      return faDigits(String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0'));
+    });
+    const modeLabel = computed(() => pomoState.mode === 'focus' ? 'تمرکز' : 'استراحت');
+    const toggle = () => {
+      if (pomoState.running) {
+        if (pomoState.endAt) pomoState.remaining = Math.max(1, Math.round((pomoState.endAt - Date.now()) / 1000));
+        if (pomoInterval) { clearInterval(pomoInterval); pomoInterval = null; }
+        pomoState.running = false; pomoState.endAt = null;
+        savePomoState();
+      } else {
+        pomoState.running = true;
+        pomoState.endAt = Date.now() + pomoState.remaining * 1000;
+        savePomoState();
+        startPomoInterval();
+      }
+    };
+    return { modals, pomoState, fmt, modeLabel, toggle };
+  },
+  template: `
+    <div id="focusOverlay" v-if="modals.focus">
+      <div class="f-time">{{ fmt }}</div>
+      <div class="f-mode">{{ modeLabel }}</div>
+      <div class="f-controls">
+        <button @click="toggle">{{ pomoState.running ? 'توقف' : 'شروع' }}</button>
+        <button class="ghost" @click="modals.focus = false">خروج</button>
+      </div>
+    </div>
+  `
+};
+
+/* ===== Notifications checker ===== */
+function checkReminders() {
+  const now = new Date();
+  const timeStr = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  const today = todayKey();
+  let changed = false;
+  store.tasks.forEach(t => {
+    if (t.reminderOn && t.reminder === timeStr && !t.done && t.lastReminded !== today) {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        try { new Notification('⏰ یادآور', { body: t.title, dir: 'rtl', lang: 'fa' }); } catch {}
+      }
+      t.lastReminded = today; changed = true;
+    }
+  });
+  if (changed) store.save();
+}
+setInterval(checkReminders, 30000);
+
+/* ===== Views map ===== */
+const views = {
+  tasks: TasksView, habits: HabitsView, notes: NotesView,
+  pomo: PomoView, calendar: CalendarView, stats: StatsView
+};
+
+/* ===== App ===== */
+const App = {
+  components: { AppHeader, BottomNav, NoteModal, TaskDetailModal, HelpModal, SettingsModal, WeatherModal, CalDayModal, FocusOverlay },
+  setup() {
+    store.applyTheme();
+    const currentTab = ref(localStorage.getItem('sb_tab') || 'tasks');
+    const changeTab = (id) => {
+      currentTab.value = id;
+      localStorage.setItem('sb_tab', id);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    const currentView = computed(() => views[currentTab.value] || views.tasks);
+    onMounted(() => {
+      restorePomo();
+      if (!localStorage.getItem('sb_seen')) {
+        localStorage.setItem('sb_seen', '1');
+        setTimeout(() => { modals.help = true; }, 600);
+      }
+    });
+    return { currentTab, changeTab, currentView };
+  },
+  template: `
+    <AppHeader />
+    <main :key="currentTab">
+      <component :is="currentView" />
+    </main>
+    <BottomNav :current="currentTab" @change="changeTab" />
+    <NoteModal />
+    <TaskDetailModal />
+    <HelpModal />
+    <SettingsModal />
+    <WeatherModal />
+    <CalDayModal />
+    <FocusOverlay />
+  `
+};
+
+/* ===== Mount ===== */
+try {
+  createApp(App).mount('#app');
+} catch (err) {
+  document.body.innerHTML = '<pre style="color:#ff6b6b;background:#111;padding:20px;font-size:13px;white-space:pre-wrap;min-height:100vh;margin:0;direction:ltr;text-align:left">'
+    + '❌ ' + err.message + '\n\n' + (err.stack || '') + '</pre>';
+}
+</script>
+</body>
+</html>
