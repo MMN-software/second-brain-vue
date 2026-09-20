@@ -3,8 +3,8 @@
    v2: کش کردن CDN و فونت‌ها برای آفلاین واقعی
    ============================================================ */
 
-const SHELL_CACHE = 'sb-vue-v2';
-const RUNTIME_CACHE = 'sb-vue-runtime-v2';
+const SHELL_CACHE = 'sb-vue-v3';
+const RUNTIME_CACHE = 'sb-vue-runtime-v3';
 
 const SHELL_ASSETS = [
   './',
