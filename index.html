@@ -207,53 +207,224 @@ input:checked+.slider:before{transform:translateX(20px);background:#fff}
 .search-result .sr-title{font-size:14px;font-weight:600;margin-bottom:4px}
 .search-result .sr-desc{font-size:12px;color:var(--muted)}
 
-/* Breathing */
 .breath-wrap{display:flex;flex-direction:column;align-items:center;padding:40px 20px}
 .breath-circle{width:200px;height:200px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;font-weight:700;transition:transform 1s ease,opacity 1s ease;box-shadow:0 0 60px color-mix(in srgb,var(--accent) 50%,transparent)}
 .breath-phase{font-size:20px;font-weight:700;margin-top:24px}
 .breath-count{font-size:48px;font-weight:800;color:var(--accent);margin-top:8px}
 .breath-info{color:var(--muted);font-size:12px;margin-top:12px;text-align:center;line-height:1.6}
 
-/* City selector */
 .city-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0}
 .city-btn{padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--glass);color:var(--text);cursor:pointer;font-family:inherit;font-size:13px}
 .city-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent;font-weight:600}
 
-/* Template picker */
 .template-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0}
 .template-btn{padding:14px 10px;border-radius:12px;border:1px solid var(--border);background:var(--glass);color:var(--text);cursor:pointer;font-family:inherit;font-size:12px;text-align:center;transition:.2s}
 .template-btn:hover{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 20%,transparent),color-mix(in srgb,var(--accent2) 15%,transparent))}
 .template-btn .tb-icon{font-size:20px;display:block;margin-bottom:6px}
+
+.toast{padding:12px 16px;border-radius:14px;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-size:13px;box-shadow:0 8px 30px rgba(0,0,0,.4);animation:toastIn .3s ease;pointer-events:auto;display:flex;align-items:center;gap:10px}
+.toast.success{border-color:color-mix(in srgb,var(--success) 50%,transparent);background:color-mix(in srgb,var(--success) 15%,var(--bg2))}
+.toast.error{border-color:color-mix(in srgb,var(--danger) 50%,transparent);background:color-mix(in srgb,var(--danger) 15%,var(--bg2))}
+.toast.info{border-color:color-mix(in srgb,var(--accent) 50%,transparent);background:color-mix(in srgb,var(--accent) 15%,var(--bg2))}
+@keyframes toastIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
 </style>
 <script type="importmap">
 {
   "imports": {
-    "vue": "https://cdn.jsdelivr.net/npm/vue@3/dist/vue.esm-browser.js"
+    "vue": "https://cdn.jsdelivr.net/npm/vue@3/dist/vue.esm-browser.js",
+    "jalaali-js": "https://esm.sh/jalaali-js@1.2.6"
   }
 }
 </script>
 </head>
 <body>
 <div id="app"></div>
+<div id="toastContainer"></div>
 
 <script type="module">
 import { createApp, reactive, ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import * as jalaali from 'jalaali-js';
 
-/* ========== Helpers ========== */
+/* ============================================================
+   Helpers
+   ============================================================ */
 const faDigits = s => String(s).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 const todayKey = (d) => {
   const x = d || new Date();
+  if (!(x instanceof Date) || isNaN(x.getTime())) {
+    return new Date().toISOString().slice(0, 10);
+  }
   return new Date(x.getTime() - x.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 };
 const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const DAY_NAMES = ['ی', 'د', 'س', 'چ', 'پ', 'ج', 'ش'];
 
+/* (باگ ۵) — تولید ID یکتا */
+function newId() {
+  try {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
+  } catch (e) { /* fallback */ }
+  return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+}
+
+/* ============================================================
+   Safe Storage
+   ============================================================ */
 const DB = {
   get(k, d) { try { return JSON.parse(localStorage.getItem('sb_' + k)) ?? d; } catch { return d; } },
-  set(k, v) { try { localStorage.setItem('sb_' + k, JSON.stringify(v)); } catch (e) { console.warn('Storage:', e); } },
+  set(k, v) {
+    try { localStorage.setItem('sb_' + k, JSON.stringify(v)); return true; }
+    catch (e) {
+      if (e.name === 'QuotaExceededError') console.warn('Storage پر شد');
+      else console.warn('Storage error:', e);
+      return false;
+    }
+  },
   remove(k) { try { localStorage.removeItem('sb_' + k); } catch {} }
 };
 
+/* ============================================================
+   Toast
+   ============================================================ */
+const toast = {
+  items: reactive([]),
+  show(msg, type = 'info', duration = 3000) {
+    const id = Date.now() + Math.random();
+    const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+    this.items.push({ id, msg: icons[type] + ' ' + msg, type });
+    setTimeout(() => this.remove(id), duration);
+  },
+  success(msg) { this.show(msg, 'success'); },
+  error(msg) { this.show(msg, 'error'); },
+  info(msg) { this.show(msg, 'info'); },
+  remove(id) {
+    const idx = this.items.findIndex(x => x.id === id);
+    if (idx > -1) this.items.splice(idx, 1);
+  }
+};
+
+/* ============================================================
+   (باگ ۴) — Web Audio با صف‌بندی تا اولین تعامل کاربر
+   ============================================================ */
+let audioCtx = null;
+let audioUnlocked = false;
+let pendingAudioFn = null;
+
+function tryCreateAudioContext() {
+  if (audioCtx) return audioCtx;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  } catch (e) {
+    console.warn('AudioContext پشتیبانی نمی‌شود');
+    audioCtx = null;
+  }
+  return audioCtx;
+}
+
+/** فقط از داخل یک event handler که توسط کاربر فعال شده صدا زده می‌شود */
+function unlockAudioNow() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  const ctx = tryCreateAudioContext();
+  if (ctx && ctx.state === 'suspended') {
+    ctx.resume().catch(() => {});
+  }
+  if (pendingAudioFn) {
+    const fn = pendingAudioFn;
+    pendingAudioFn = null;
+    Promise.resolve().then(fn);
+  }
+}
+
+function registerAudioUnlockers() {
+  if (typeof document === 'undefined') return;
+  const opts = { once: true, passive: true, capture: true };
+  ['click', 'touchstart', 'keydown', 'pointerdown'].forEach(evt => {
+    document.addEventListener(evt, unlockAudioNow, opts);
+  });
+}
+registerAudioUnlockers();
+
+async function ensureAudioReady() {
+  if (!audioUnlocked) return null;
+  const ctx = tryCreateAudioContext();
+  if (!ctx) return null;
+  if (ctx.state === 'suspended') {
+    try { await ctx.resume(); } catch (e) { console.warn('Audio resume failed:', e); }
+  }
+  return ctx;
+}
+
+async function playSound(type) {
+  const ctx = await ensureAudioReady();
+  if (!ctx) {
+    pendingAudioFn = () => playSound(type);
+    return;
+  }
+  try {
+    const t = ctx.currentTime;
+    const beep = (f, st, d, vol = 0.3, w = 'sine') => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = f; o.type = w;
+      g.gain.setValueAtTime(0.001, t + st);
+      g.gain.exponentialRampToValueAtTime(vol, t + st + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, t + st + d);
+      o.start(t + st); o.stop(t + st + d + 0.05);
+    };
+    if (type === 'bell') [880, 1108, 1318].forEach((f, i) => beep(f, i * 0.14, 0.5, 0.3));
+    else if (type === 'birds') { for (let i = 0; i < 5; i++) beep(1800 + i * 180, i * 0.09, 0.1, 0.15); beep(1500, 0.6, 0.25, 0.2); }
+    else if (type === 'synth') { beep(220, 0, 0.35, 0.2, 'sawtooth'); beep(330, 0.15, 0.4, 0.2, 'sawtooth'); beep(440, 0.3, 0.6, 0.25, 'sawtooth'); }
+    else { beep(800, 0, 0.1); beep(1000, 0.15, 0.1); beep(1200, 0.3, 0.2); }
+  } catch (e) {
+    console.warn('صدا پخش نشد:', e);
+  }
+}
+
+/* ============================================================
+   (باگ ۱) — محاسبه‌ی ایمن تاریخ بعدی تکرار با تقویم شمسی
+   ============================================================ */
+function computeNextDueDate(recurrence) {
+  try {
+    const now = new Date();
+    if (isNaN(now.getTime())) return null;
+    if (!['daily', 'weekly', 'monthly'].includes(recurrence)) return null;
+
+    const d = new Date(now.getTime());
+
+    if (recurrence === 'daily') {
+      d.setDate(d.getDate() + 1);
+    } else if (recurrence === 'weekly') {
+      d.setDate(d.getDate() + 7);
+    } else if (recurrence === 'monthly') {
+      // تبدیل میلادی → شمسی
+      const j = jalaali.toJalaali(d.getFullYear(), d.getMonth() + 1, d.getDate());
+      let jy = j.jy;
+      let jm = j.jm + 1;
+      if (jm > 12) { jm = 1; jy++; }
+
+      const maxDay = jalaali.jalaaliMonthLength(jy, jm);
+      const jd = Math.min(j.jd, maxDay);
+
+      const g = jalaali.toGregorian(jy, jm, jd);
+      const nextDate = new Date(g.gy, g.gm - 1, g.gd);
+      if (isNaN(nextDate.getTime())) return null;
+      return todayKey(nextDate);
+    }
+
+    if (isNaN(d.getTime())) return null;
+    return todayKey(d);
+  } catch (e) {
+    console.warn('خطا در محاسبه تاریخ تکرار:', e);
+    return null;
+  }
+}
+
+/* ============================================================
+   DEFAULT SETTINGS
+   ============================================================ */
 const DEFAULT_SETTINGS = {
   theme: 'dark', accent: 'purple', sound: 'bell',
   autoTheme: false,
@@ -263,7 +434,9 @@ const DEFAULT_SETTINGS = {
   weeklyGoals: { tasks: 25, habits: 15, pomo: 20 }
 };
 
-/* ========== Data ========== */
+/* ============================================================
+   CONSTANTS
+   ============================================================ */
 const CITIES = [
   { id: 'tehran', name: 'تهران', lat: 35.6892, lon: 51.3890 },
   { id: 'mashhad', name: 'مشهد', lat: 36.2605, lon: 59.6168 },
@@ -316,7 +489,7 @@ const HABIT_EMOJIS = [
 ];
 
 const NOTE_TEMPLATES = [
-  { id: 'daily', icon: '📅', title: 'خاطرات روزانه', body: '📅 تاریخ: ' + '\n\n☀️ امروز چه اتفاقی افتاد؟\n\n😊 چه چیزی خوب بود؟\n\n😔 چه چیزی سخت بود؟\n\n🙏 بابت چه چیزی شکرگزارم؟\n\n🎯 فردا می‌خواهم چه کار کنم؟' },
+  { id: 'daily', icon: '📅', title: 'خاطرات روزانه', body: '📅 تاریخ: \n\n☀️ امروز چه اتفاقی افتاد؟\n\n😊 چه چیزی خوب بود؟\n\n😔 چه چیزی سخت بود؟\n\n🙏 بابت چه چیزی شکرگزارم؟\n\n🎯 فردا می‌خواهم چه کار کنم؟' },
   { id: 'idea', icon: '💡', title: 'ایده', body: '💡 ایده:\n\n\n\n🎯 چرا این ایده؟\n\n\n\n⚙️ چطور اجرا کنم؟\n\n\n\n📊 منابع مورد نیاز:\n' },
   { id: 'todo', icon: '✅', title: 'لیست کار', body: '📋 لیست کارها:\n\n☐ \n☐ \n☐ \n☐ \n☐ \n\n⏰ ددلاین: ' },
   { id: 'book', icon: '📖', title: 'خلاصه کتاب', body: '📖 عنوان کتاب:\n\n✍️ نویسنده:\n\n🌟 نکات کلیدی:\n\n۱. \n\n۲. \n\n۳. \n\n💭 نظر من:\n' },
@@ -326,12 +499,29 @@ const NOTE_TEMPLATES = [
   { id: 'blank', icon: '📝', title: 'سفید', body: '' }
 ];
 
-/* ========== Store ========== */
+/* ============================================================
+   (باگ ۲) — ریست شمارنده‌ی روزانه‌ی پومودورو
+   ============================================================ */
+function resetPomoIfNewDay(pomo) {
+  if (!pomo || typeof pomo !== 'object') {
+    return { today: todayKey(), todayCount: 0, total: 0, minutes: 0 };
+  }
+  const today = todayKey();
+  if (pomo.today !== today) {
+    pomo.today = today;
+    pomo.todayCount = 0;
+  }
+  return pomo;
+}
+
+/* ============================================================
+   Store
+   ============================================================ */
 const store = reactive({
   tasks: DB.get('tasks', []),
   habits: DB.get('habits', []),
   notes: DB.get('notes', []),
-  pomo: DB.get('pomo', { today: todayKey(), todayCount: 0, total: 0, minutes: 0 }),
+  pomo: resetPomoIfNewDay(DB.get('pomo', { today: todayKey(), todayCount: 0, total: 0, minutes: 0 })),
   settings: { ...DEFAULT_SETTINGS, ...DB.get('settings', {}) },
 
   save() {
@@ -356,16 +546,17 @@ const store = reactive({
     this.save(); this.applyTheme();
   },
 
-  /* Tasks */
+  /* ---- Tasks ---- */
   addTask(data) {
     if (typeof data === 'string') data = { title: data };
     if (!data.title?.trim()) return;
     this.tasks.unshift({
-      id: Date.now() + '', title: data.title.trim(), prio: data.prio || 'med',
+      id: newId(),
+      title: data.title.trim(), prio: data.prio || 'med',
       done: false, createdAt: todayKey(), doneAt: null,
       reminder: data.reminder || null, reminderOn: !!data.reminderOn,
       recurrence: data.recurrence || null,
-      lastReminded: null, lastRepeat: null
+      lastReminded: null, lastRepeat: null, dueDate: null
     });
     this.save();
   },
@@ -374,19 +565,24 @@ const store = reactive({
     if (!t) return;
     t.done = !t.done;
     t.doneAt = t.done ? todayKey() : null;
+
     if (t.done && t.recurrence) {
       const today = todayKey();
       if (t.lastRepeat !== today) {
-        const nextDate = new Date();
-        if (t.recurrence === 'daily') nextDate.setDate(nextDate.getDate() + 1);
-        else if (t.recurrence === 'weekly') nextDate.setDate(nextDate.getDate() + 7);
-        else if (t.recurrence === 'monthly') nextDate.setMonth(nextDate.getMonth() + 1);
+        const nextDue = computeNextDueDate(t.recurrence);
         this.tasks.unshift({
-          id: (Date.now() + 1) + '', title: t.title, prio: t.prio,
-          done: false, createdAt: todayKey(), doneAt: null,
-          reminder: t.reminder, reminderOn: t.reminderOn,
-          recurrence: t.recurrence, lastReminded: null,
-          lastRepeat: today
+          id: newId(),
+          title: t.title,
+          prio: t.prio,
+          done: false,
+          createdAt: todayKey(),
+          doneAt: null,
+          reminder: t.reminder,
+          reminderOn: t.reminderOn,
+          recurrence: t.recurrence,
+          lastReminded: null,
+          lastRepeat: today,
+          dueDate: nextDue
         });
         t.lastRepeat = today;
       }
@@ -395,10 +591,20 @@ const store = reactive({
   },
   deleteTask(id) { this.tasks = this.tasks.filter(x => x.id !== id); this.save(); },
 
-  /* Habits */
+  /* (باگ ۳) — به‌روزرسانی تسک */
+  updateTask(updatedTask) {
+    if (!updatedTask || !updatedTask.id) return false;
+    const idx = this.tasks.findIndex(t => t.id === updatedTask.id);
+    if (idx === -1) return false;
+    this.tasks[idx] = { ...this.tasks[idx], ...updatedTask };
+    this.save();
+    return true;
+  },
+
+  /* ---- Habits ---- */
   addHabit(name, emoji) {
     if (!name.trim()) return;
-    this.habits.unshift({ id: Date.now() + '', name: name.trim(), emoji: emoji || '🎯', days: {} });
+    this.habits.unshift({ id: newId(), name: name.trim(), emoji: emoji || '🎯', days: {} });
     this.save();
   },
   toggleHabitDay(id, key) {
@@ -409,14 +615,15 @@ const store = reactive({
   },
   deleteHabit(id) { this.habits = this.habits.filter(x => x.id !== id); this.save(); },
 
-  /* Notes */
+  /* ---- Notes ---- */
   saveNote(note) {
     if (note.id) {
       const n = this.notes.find(x => x.id === note.id);
       if (n) Object.assign(n, note);
     } else {
       this.notes.unshift({
-        id: Date.now() + '', title: note.title, body: note.body,
+        id: newId(),
+        title: note.title, body: note.body,
         tags: note.tags || [],
         date: new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date()),
         createdAt: todayKey()
@@ -427,7 +634,9 @@ const store = reactive({
   deleteNote(id) { this.notes = this.notes.filter(x => x.id !== id); this.save(); }
 });
 
-/* ========== Utils ========== */
+/* ============================================================
+   Utilities
+   ============================================================ */
 function last7Days() {
   const arr = [];
   for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); arr.push({ key: todayKey(d), jsDay: d.getDay(), num: d.getDate() }); }
@@ -454,7 +663,9 @@ function totalStreak() {
 function weekStart() { const d = new Date(); const day = d.getDay(); const diff = day === 6 ? 0 : day + 1; d.setDate(d.getDate() - diff); return todayKey(d); }
 function isInThisWeek(key) { return key >= weekStart(); }
 
-/* ========== Modals state ========== */
+/* ============================================================
+   Modals State
+   ============================================================ */
 const modals = reactive({
   help: false, helpSection: 'tasks',
   settings: false, weather: false,
@@ -463,7 +674,9 @@ const modals = reactive({
   emoji: null
 });
 
-/* ========== HELP DATA ========== */
+/* ============================================================
+   HELP DATA
+   ============================================================ */
 const HELP_DATA = {
   tasks: { icon: '✅', title: 'کارها', intro: 'کارهای روزانه‌ت با اولویت، یادآور و تکرار.', points: [
     '<b>افزودن:</b> بنویس و Enter بزن', '<b>اولویت:</b> 🔴 بالا، 🟡 متوسط، 🟢 پایین',
@@ -491,7 +704,9 @@ const HELP_DATA = {
   ]}
 };
 
-/* ========== ACHIEVEMENTS ========== */
+/* ============================================================
+   ACHIEVEMENTS
+   ============================================================ */
 const ACHIEVEMENTS = [
   { id: 'first_task', icon: '🌱', title: 'شروع‌کننده', desc: 'اولین کار', check: s => s.tasks.length >= 1 },
   { id: 'task_10', icon: '💪', title: 'کارآزموده', desc: '۱۰ کار', check: s => s.tasks.length >= 10 },
@@ -511,51 +726,67 @@ const ACHIEVEMENTS = [
   { id: 'pomo_100', icon: '👑', title: 'استاد تمرکز', desc: '۱۰۰ پومو', check: s => s.pomo.total >= 100 }
 ];
 
-/* ========== POMODORO ========== */
+/* ============================================================
+   Timer Registry
+   ============================================================ */
+const intervalRegistry = {
+  items: new Map(),
+  set(name, fn, ms) {
+    this.clear(name);
+    const id = setInterval(fn, ms);
+    this.items.set(name, id);
+    return id;
+  },
+  clear(name) {
+    if (this.items.has(name)) {
+      clearInterval(this.items.get(name));
+      this.items.delete(name);
+    }
+  },
+  clearAll() {
+    this.items.forEach((id) => clearInterval(id));
+    this.items.clear();
+  }
+};
+
+/* ============================================================
+   POMODORO
+   ============================================================ */
 const POMO_FOCUS = 25 * 60, POMO_BREAK = 5 * 60;
-let pomoInterval = null;
 const pomoState = reactive({ mode: 'focus', remaining: POMO_FOCUS, running: false, endAt: null });
 const POMO_KEY = 'pomoTimer';
+const POMO_INTERVAL = 'pomo';
 
-function savePomoState() { DB.set(POMO_KEY, { mode: pomoState.mode, remaining: pomoState.remaining, running: pomoState.running, endAt: pomoState.endAt }); }
+function savePomoState() {
+  DB.set(POMO_KEY, { mode: pomoState.mode, remaining: pomoState.remaining, running: pomoState.running, endAt: pomoState.endAt });
+}
 function clearPomoState() { DB.remove(POMO_KEY); }
 
-function playSound(type) {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const t = ctx.currentTime;
-    const beep = (f, st, d, vol = 0.3, w = 'sine') => {
-      const o = ctx.createOscillator(), g = ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.frequency.value = f; o.type = w;
-      g.gain.setValueAtTime(0.001, t + st);
-      g.gain.exponentialRampToValueAtTime(vol, t + st + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.001, t + st + d);
-      o.start(t + st); o.stop(t + st + d + 0.05);
-    };
-    if (type === 'bell') [880, 1108, 1318].forEach((f, i) => beep(f, i * 0.14, 0.5, 0.3));
-    else if (type === 'birds') { for (let i = 0; i < 5; i++) beep(1800 + i * 180, i * 0.09, 0.1, 0.15); beep(1500, 0.6, 0.25, 0.2); }
-    else if (type === 'synth') { beep(220, 0, 0.35, 0.2, 'sawtooth'); beep(330, 0.15, 0.4, 0.2, 'sawtooth'); beep(440, 0.3, 0.6, 0.25, 'sawtooth'); }
-    else { beep(800, 0, 0.1); beep(1000, 0.15, 0.1); beep(1200, 0.3, 0.2); }
-  } catch (e) {}
-}
-
 function finishPomo() {
-  if (pomoInterval) { clearInterval(pomoInterval); pomoInterval = null; }
+  intervalRegistry.clear(POMO_INTERVAL);
   pomoState.running = false; pomoState.endAt = null;
   playSound(store.settings.sound || 'bell');
+
+  /* (باگ ۲) — قبل از افزایش، از روز جدید مطمئن شو */
+  store.pomo = resetPomoIfNewDay(store.pomo);
+
   if (pomoState.mode === 'focus') {
-    store.pomo.todayCount++; store.pomo.total++; store.pomo.minutes += 25;
-    pomoState.mode = 'break'; pomoState.remaining = POMO_BREAK;
+    store.pomo.todayCount++;
+    store.pomo.total++;
+    store.pomo.minutes += 25;
+    pomoState.mode = 'break';
+    pomoState.remaining = POMO_BREAK;
   } else {
-    pomoState.mode = 'focus'; pomoState.remaining = POMO_FOCUS;
+    pomoState.mode = 'focus';
+    pomoState.remaining = POMO_FOCUS;
   }
-  store.save(); savePomoState();
+  store.save();
+  savePomoState();
 }
 
 function startPomoInterval() {
-  if (pomoInterval) clearInterval(pomoInterval);
-  pomoInterval = setInterval(() => {
+  intervalRegistry.clear(POMO_INTERVAL);
+  intervalRegistry.set(POMO_INTERVAL, () => {
     if (!pomoState.endAt) return;
     const rem = Math.round((pomoState.endAt - Date.now()) / 1000);
     pomoState.remaining = Math.max(0, rem);
@@ -565,10 +796,10 @@ function startPomoInterval() {
 
 function restorePomo() {
   const s = DB.get(POMO_KEY, null);
-  if (!s || typeof s.remaining !== 'number') return;
+  if (!s || typeof s.remaining !== 'number' || isNaN(s.remaining)) return;
   pomoState.mode = s.mode === 'break' ? 'break' : 'focus';
   pomoState.running = !!s.running;
-  if (pomoState.running && s.endAt) {
+  if (pomoState.running && s.endAt && typeof s.endAt === 'number') {
     pomoState.remaining = Math.max(0, Math.round((s.endAt - Date.now()) / 1000));
     pomoState.endAt = s.endAt;
     if (pomoState.remaining <= 0) finishPomo(); else startPomoInterval();
@@ -578,11 +809,117 @@ function restorePomo() {
   }
 }
 
-/* ========== COMPONENTS ========== */
+/* ============================================================
+   Weather state
+   ============================================================ */
+const weatherState = reactive({
+  loading: false,
+  error: '',
+  data: null,
+  lastUpdated: null
+});
+
+function wIcon(code) {
+  if (code === 0) return '☀️';
+  if (code <= 3) return '🌤';
+  if (code <= 48) return '☁️';
+  if (code <= 67) return '🌧';
+  if (code <= 77) return '🌨';
+  if (code <= 82) return '🌧';
+  return '⛈';
+}
+
+async function fetchWeather(force = false) {
+  const city = CITIES.find(c => c.id === store.settings.city) || CITIES[0];
+  const cacheKey = 'weather_' + city.id;
+  const cached = DB.get(cacheKey, null);
+  const now = Date.now();
+
+  if (!force && cached && cached.time && now - cached.time < 1800000 && cached.data?.current) {
+    weatherState.data = cached.data.current;
+    weatherState.lastUpdated = cached.time;
+    weatherState.error = '';
+    weatherState.loading = false;
+    return;
+  }
+
+  weatherState.loading = true;
+  weatherState.error = '';
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m&timezone=Asia/Tehran`;
+    const res = await fetch(url, { cache: 'no-store', signal: controller.signal });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!data?.current) throw new Error('پاسخ نامعتبر از سرور');
+    DB.set(cacheKey, { time: now, data });
+    weatherState.data = data.current;
+    weatherState.lastUpdated = now;
+    weatherState.error = '';
+  } catch (e) {
+    const msg = e.name === 'AbortError' ? 'درخواست طول کشید' : (e.message || 'خطای شبکه');
+    weatherState.error = msg;
+    if (cached?.data?.current) {
+      weatherState.data = cached.data.current;
+      weatherState.lastUpdated = cached.time;
+    } else {
+      weatherState.data = null;
+    }
+  } finally {
+    clearTimeout(timeoutId);
+    weatherState.loading = false;
+  }
+}
+
+/* ============================================================
+   Import Validation
+   ============================================================ */
+function validateImportData(raw) {
+  const errors = [];
+  if (!raw || typeof raw !== 'object') {
+    return { ok: false, errors: ['فایل معتبر نیست (JSON نامعتبر)'] };
+  }
+  if (!raw.state || typeof raw.state !== 'object') {
+    return { ok: false, errors: ['کلید state در فایل یافت نشد'] };
+  }
+  const s = raw.state;
+  if (!Array.isArray(s.tasks)) errors.push('tasks باید آرایه باشد');
+  if (!Array.isArray(s.habits)) errors.push('habits باید آرایه باشد');
+  if (!Array.isArray(s.notes)) errors.push('notes باید آرایه باشد');
+
+  const fatal = errors.filter(e => !e.includes('آرایه'));
+
+  const normalized = {
+    tasks: Array.isArray(s.tasks) ? s.tasks.filter(t => t && typeof t === 'object' && t.id && t.title) : [],
+    habits: Array.isArray(s.habits) ? s.habits.filter(h => h && typeof h === 'object' && h.id && h.name) : [],
+    notes: Array.isArray(s.notes) ? s.notes.filter(n => n && typeof n === 'object' && n.id) : [],
+    pomo: (s.pomo && typeof s.pomo === 'object') ? s.pomo : { today: todayKey(), todayCount: 0, total: 0, minutes: 0 },
+    settings: (s.settings && typeof s.settings === 'object') ? s.settings : {}
+  };
+
+  const d = DEFAULT_SETTINGS;
+  if (!['dark','light'].includes(normalized.settings.theme)) normalized.settings.theme = d.theme;
+  if (!['purple','blue','pink','green','orange','red'].includes(normalized.settings.accent)) normalized.settings.accent = d.accent;
+  if (!['bell','birds','synth','beep'].includes(normalized.settings.sound)) normalized.settings.sound = d.sound;
+  if (!normalized.settings.goals) normalized.settings.goals = { ...d.goals };
+  if (!normalized.settings.weeklyGoals) normalized.settings.weeklyGoals = { ...d.weeklyGoals };
+  normalized.settings = { ...d, ...normalized.settings };
+
+  if (fatal.length > 0) return { ok: false, errors: fatal };
+  return { ok: true, data: normalized, warnings: errors };
+}
+
+/* ============================================================
+   COMPONENTS
+   ============================================================ */
+
 const AppHeader = {
   setup() {
     const clock = ref('--:--'), date = ref('—'), greet = ref('سلام');
-    const weather = ref({ temp: null, icon: '🌤' });
+
     const tick = () => {
       const now = new Date();
       clock.value = faDigits(String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0'));
@@ -595,28 +932,31 @@ const AppHeader = {
       else if (h < 20) greet.value = 'عصر بخیر 🌇';
       else greet.value = 'شب بخیر 🌙';
     };
-    const wIcon = (c) => { if (c === 0) return '☀️'; if (c <= 3) return '🌤'; if (c <= 48) return '☁️'; if (c <= 67) return '🌧'; if (c <= 77) return '🌨'; if (c <= 82) return '🌧'; return '⛈'; };
-    const fetchWeather = async () => {
-      const city = CITIES.find(c => c.id === store.settings.city) || CITIES[0];
-      const cacheKey = 'weather_' + city.id;
-      const cached = DB.get(cacheKey, null);
-      if (cached && Date.now() - cached.time < 1800000) { weather.value = { temp: Math.round(cached.data.current.temperature_2m), icon: wIcon(cached.data.current.weather_code) }; return; }
-      try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m&timezone=Asia/Tehran`;
-        const res = await fetch(url, { cache: 'no-store' });
-        if (!res.ok) throw new Error('HTTP');
-        const data = await res.json();
-        if (!data?.current) throw new Error('Bad');
-        DB.set(cacheKey, { time: Date.now(), data });
-        weather.value = { temp: Math.round(data.current.temperature_2m), icon: wIcon(data.current.weather_code) };
-      } catch (e) {
-        if (cached?.data?.current) weather.value = { temp: Math.round(cached.data.current.temperature_2m), icon: wIcon(cached.data.current.weather_code) };
-      }
-    };
-    let timer;
-    onMounted(() => { tick(); fetchWeather(); timer = setInterval(tick, 1000); });
-    onUnmounted(() => clearInterval(timer));
-    watch(() => store.settings.city, fetchWeather);
+
+    const weather = computed(() => {
+      if (weatherState.loading) return { icon: '⏳', temp: null, label: '...' };
+      if (weatherState.error && !weatherState.data) return { icon: '🌫', temp: null, label: '—' };
+      if (!weatherState.data) return { icon: '🌤', temp: null, label: '—' };
+      return {
+        icon: wIcon(weatherState.data.weather_code),
+        temp: Math.round(weatherState.data.temperature_2m),
+        label: null
+      };
+    });
+
+    onMounted(() => {
+      tick();
+      intervalRegistry.set('headerClock', tick, 1000);
+      fetchWeather();
+      intervalRegistry.set('weatherRefresh', () => fetchWeather(), 1800000);
+    });
+    onUnmounted(() => {
+      intervalRegistry.clear('headerClock');
+      intervalRegistry.clear('weatherRefresh');
+    });
+
+    watch(() => store.settings.city, () => fetchWeather(true));
+
     return { store, modals, clock, date, greet, weather, faDigits };
   },
   template: `
@@ -626,7 +966,8 @@ const AppHeader = {
           <span class="h-greet">{{ greet }}</span>
           <button class="weather-mini" @click="modals.weather = true">
             <span>{{ weather.icon }}</span>
-            <span>{{ weather.temp !== null ? faDigits(weather.temp) + '°' : '—' }}</span>
+            <span v-if="weather.temp !== null">{{ faDigits(weather.temp) }}°</span>
+            <span v-else>{{ weather.label }}</span>
           </button>
         </div>
         <div class="h-time">{{ clock }}</div>
@@ -665,11 +1006,13 @@ const BottomNav = {
   `
 };
 
-/* ===== TasksView ===== */
 const TasksView = {
   setup() {
     const input = ref(''), prio = ref('med'), recurrence = ref('');
-    const add = () => { store.addTask({ title: input.value, prio: prio.value, recurrence: recurrence.value || null }); input.value = ''; recurrence.value = ''; };
+    const add = () => {
+      store.addTask({ title: input.value, prio: prio.value, recurrence: recurrence.value || null });
+      input.value = ''; recurrence.value = '';
+    };
     const total = computed(() => store.tasks.length);
     const done = computed(() => store.tasks.filter(t => t.done).length);
     const dailyGoals = computed(() => {
@@ -687,7 +1030,6 @@ const TasksView = {
       const g = store.settings.weeklyGoals;
       const t = store.tasks.filter(x => x.done && x.doneAt && isInThisWeek(x.doneAt)).length;
       let h = 0; store.habits.forEach(hab => Object.keys(hab.days).forEach(k => { if (isInThisWeek(k)) h++; }));
-      const p = store.pomo.total;
       return [
         { icon: '✅', lbl: 'کار هفته', val: t, target: g.tasks },
         { icon: '🎯', lbl: 'عادت هفته', val: h, target: g.habits }
@@ -747,7 +1089,6 @@ const TasksView = {
   `
 };
 
-/* ===== HabitsView ===== */
 const HabitsView = {
   setup() {
     const input = ref('');
@@ -790,7 +1131,6 @@ const HabitsView = {
   `
 };
 
-/* ===== NotesView ===== */
 const NotesView = {
   setup() {
     const filterTag = ref('');
@@ -835,7 +1175,6 @@ const NotesView = {
   `
 };
 
-/* ===== PomoView ===== */
 const PomoView = {
   setup() {
     const fmt = computed(() => { const m = Math.floor(pomoState.remaining / 60), s = pomoState.remaining % 60; return faDigits(String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0')); });
@@ -844,16 +1183,20 @@ const PomoView = {
     const toggle = () => {
       if (pomoState.running) {
         if (pomoState.endAt) pomoState.remaining = Math.max(1, Math.round((pomoState.endAt - Date.now()) / 1000));
-        if (pomoInterval) { clearInterval(pomoInterval); pomoInterval = null; }
+        intervalRegistry.clear(POMO_INTERVAL);
         pomoState.running = false; pomoState.endAt = null;
         savePomoState();
       } else {
+        /* (باگ ۲) — ریست روزانه هنگام شروع تایمر */
+        store.pomo = resetPomoIfNewDay(store.pomo);
+        store.save();
+
         pomoState.running = true; pomoState.endAt = Date.now() + pomoState.remaining * 1000;
         savePomoState(); startPomoInterval();
       }
     };
     const reset = () => {
-      if (pomoInterval) { clearInterval(pomoInterval); pomoInterval = null; }
+      intervalRegistry.clear(POMO_INTERVAL);
       pomoState.running = false; pomoState.endAt = null;
       pomoState.mode = 'focus'; pomoState.remaining = POMO_FOCUS;
       clearPomoState(); savePomoState();
@@ -886,7 +1229,6 @@ const PomoView = {
   `
 };
 
-/* ===== CalendarView ===== */
 const PERSIAN_MONTHS = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
 function getPersianDate(date) {
   try {
@@ -955,7 +1297,6 @@ const CalendarView = {
   `
 };
 
-/* ===== StatsView ===== */
 const StatsView = {
   setup() {
     const range = ref(7);
@@ -978,7 +1319,24 @@ const StatsView = {
     const unlockedCount = computed(() => ACHIEVEMENTS.filter(a => a.check(store)).length);
     const labelFor = (d) => range.value === 30 ? faDigits(d.num) : DAY_NAMES[d.jsDay];
 
-    const shareStats = () => {
+    const shareStats = async () => {
+      try {
+        if (document.fonts && document.fonts.ready) {
+          await document.fonts.ready;
+        }
+        if (document.fonts && document.fonts.load) {
+          try {
+            await Promise.all([
+              document.fonts.load('bold 48px Vazirmatn'),
+              document.fonts.load('bold 26px Vazirmatn'),
+              document.fonts.load('22px Vazirmatn'),
+              document.fonts.load('18px Vazirmatn'),
+              document.fonts.load('16px Vazirmatn')
+            ]);
+          } catch (e) {}
+        }
+      } catch (e) {}
+
       const c = document.createElement('canvas'); c.width = 800; c.height = 1000;
       const ctx = c.getContext('2d');
       const grad = ctx.createLinearGradient(0, 0, 800, 1000);
@@ -1083,6 +1441,7 @@ const StatsView = {
 };
 
 /* ===== MODALS ===== */
+
 const NoteModal = {
   setup() {
     const title = ref(''), body = ref(''), tagsStr = ref('');
@@ -1094,8 +1453,9 @@ const NoteModal = {
       const tags = tagsStr.value.split(/[,،]/).map(x => x.trim()).filter(Boolean);
       store.saveNote({ id: modals.note.id, title: title.value.trim(), body: body.value.trim(), tags });
       modals.note = null;
+      toast.success('یادداشت ذخیره شد');
     };
-    const remove = () => { if (modals.note.id && confirm('این یادداشت حذف بشه؟')) { store.deleteNote(modals.note.id); modals.note = null; } };
+    const remove = () => { if (modals.note.id && confirm('این یادداشت حذف بشه؟')) { store.deleteNote(modals.note.id); modals.note = null; toast.info('یادداشت حذف شد'); } };
     return { modals, title, body, tagsStr, save, remove, templates, applyTemplate };
   },
   template: `
@@ -1123,20 +1483,38 @@ const NoteModal = {
   `
 };
 
+/* (باگ ۳) — اتصال مودال به updateTask */
 const TaskDetailModal = {
   setup() {
     const time = ref(''), on = ref(false), recurrence = ref('');
     watch(() => modals.taskDetail, (v) => { if (v) { time.value = v.reminder || ''; on.value = !!v.reminderOn; recurrence.value = v.recurrence || ''; } }, { immediate: true });
     const save = () => {
-      const t = store.tasks.find(x => x.id === modals.taskDetail.id); if (!t) return;
-      if (on.value && !time.value) { alert('اول ساعت رو مشخص کن'); return; }
-      t.reminder = time.value; t.reminderOn = on.value; t.recurrence = recurrence.value || null;
-      t.lastReminded = null; store.save(); modals.taskDetail = null;
+      if (!modals.taskDetail) return;
+      const t = store.tasks.find(x => x.id === modals.taskDetail.id);
+      if (!t) { toast.error('تسک پیدا نشد'); return; }
+      if (on.value && !time.value) { toast.error('اول ساعت رو مشخص کن'); return; }
+
+      const updated = {
+        ...t,
+        reminder: time.value,
+        reminderOn: on.value,
+        recurrence: recurrence.value || null,
+        lastReminded: null
+      };
+      const ok = store.updateTask(updated);
+      if (ok) {
+        modals.taskDetail = null;
+        toast.success('ذخیره شد');
+      } else {
+        toast.error('خطا در ذخیره');
+      }
     };
     const remove = () => {
       const t = store.tasks.find(x => x.id === modals.taskDetail.id); if (!t) return;
-      t.reminder = null; t.reminderOn = false; t.recurrence = null;
-      store.save(); modals.taskDetail = null;
+      const updated = { ...t, reminder: null, reminderOn: false, recurrence: null };
+      store.updateTask(updated);
+      modals.taskDetail = null;
+      toast.info('پاک شد');
     };
     return { modals, time, on, recurrence, save, remove };
   },
@@ -1248,10 +1626,11 @@ const SettingsModal = {
       store.save();
     };
     const requestNotif = async () => {
-      if (!('Notification' in window)) { alert('مرورگرت پشتیبانی نمی‌کنه'); return; }
+      if (!('Notification' in window)) { toast.error('مرورگرت پشتیبانی نمی‌کنه'); return; }
       const p = await Notification.requestPermission();
       updateNotifStatus();
-      alert(p === 'granted' ? '✅ فعال شد' : '❌ اجازه داده نشد');
+      if (p === 'granted') toast.success('نوتیفیکیشن فعال شد');
+      else toast.error('اجازه داده نشد');
     };
     const exportData = () => {
       try {
@@ -1260,53 +1639,58 @@ const SettingsModal = {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a'); a.href = url; a.download = `second-brain-${todayKey()}.json`; a.click();
         URL.revokeObjectURL(url);
-      } catch (e) { alert('❌ خطا: ' + e.message); }
+        toast.success('فایل پشتیبان دانلود شد');
+      } catch (e) { toast.error('خطا: ' + e.message); }
     };
     const triggerImport = () => { importFile.value.value = ''; importFile.value.click(); };
     const onImport = (e) => {
       const f = e.target.files[0]; if (!f) return;
       const r = new FileReader();
       r.onload = ev => {
-        try {
-          const data = JSON.parse(ev.target.result);
-          if (!data?.state || typeof data.state !== 'object') throw new Error('ساختار معتبر نیست');
-          const s = data.state;
-          if (!Array.isArray(s.tasks)) s.tasks = [];
-          if (!Array.isArray(s.habits)) s.habits = [];
-          if (!Array.isArray(s.notes)) s.notes = [];
-          if (!s.settings || typeof s.settings !== 'object') s.settings = {};
-          const d = DEFAULT_SETTINGS;
-          if (!['dark','light'].includes(s.settings.theme)) s.settings.theme = d.theme;
-          if (!['purple','blue','pink','green','orange','red'].includes(s.settings.accent)) s.settings.accent = d.accent;
-          if (!['bell','birds','synth','beep'].includes(s.settings.sound)) s.settings.sound = d.sound;
-          if (!s.settings.goals) s.settings.goals = { ...d.goals };
-          if (!s.settings.weeklyGoals) s.settings.weeklyGoals = { ...d.weeklyGoals };
-          if (!s.pomo || typeof s.pomo !== 'object') s.pomo = { today: todayKey(), todayCount: 0, total: 0, minutes: 0 };
-          if (!confirm('داده‌های فعلی جایگزین بشن؟')) return;
-          store.tasks = s.tasks; store.habits = s.habits; store.notes = s.notes;
-          store.pomo = s.pomo; store.settings = { ...DEFAULT_SETTINGS, ...s.settings };
-          store.save(); store.applyTheme();
-          alert('✅ بازیابی شد');
-          modals.settings = false;
-        } catch (err) { alert('❌ فایل معتبر نیست: ' + err.message); }
+        let raw;
+        try { raw = JSON.parse(ev.target.result); }
+        catch (parseErr) { toast.error('فایل JSON خراب است'); return; }
+
+        const result = validateImportData(raw);
+        if (!result.ok) {
+          toast.error('فایل معتبر نیست: ' + result.errors.join(' | '));
+          return;
+        }
+
+        if (!confirm('داده‌های فعلی با فایل پشتیبان جایگزین شوند؟')) return;
+
+        store.tasks = result.data.tasks;
+        store.habits = result.data.habits;
+        store.notes = result.data.notes;
+        store.pomo = result.data.pomo;
+        store.settings = result.data.settings;
+        store.save(); store.applyTheme();
+        toast.success('بازیابی با موفقیت انجام شد');
+        if (result.warnings.length) toast.info('هشدار: ' + result.warnings.join(' | '));
+        modals.settings = false;
       };
+      r.onerror = () => toast.error('خطا در خواندن فایل');
       r.readAsText(f);
     };
+
     const clearAll = () => {
       if (!confirm('⚠️ همه‌ی داده‌ها پاک بشن؟')) return;
       if (!confirm('مطمئنی؟ برگشت‌ناپذیره!')) return;
-      ['tasks','habits','notes','pomo','snapshots','weather','weather_tehran','settings'].forEach(k => DB.remove(k));
+      ['tasks','habits','notes','pomo','snapshots','weather','settings'].forEach(k => DB.remove(k));
+      CITIES.forEach(c => DB.remove('weather_' + c.id));
       clearPomoState();
       store.tasks = []; store.habits = []; store.notes = [];
       store.pomo = { today: todayKey(), todayCount: 0, total: 0, minutes: 0 };
       store.settings = { ...DEFAULT_SETTINGS };
       store.save(); store.applyTheme();
-      if (pomoInterval) { clearInterval(pomoInterval); pomoInterval = null; }
+      intervalRegistry.clear(POMO_INTERVAL);
       pomoState.running = false; pomoState.endAt = null;
       pomoState.mode = 'focus'; pomoState.remaining = POMO_FOCUS;
       savePomoState();
-      alert('🗑 پاک شد'); modals.settings = false;
+      toast.success('همه‌ی داده‌ها پاک شد');
+      modals.settings = false;
     };
+
     return { store, modals, ACCENTS, CITIES, gt, gh, gp, wt, wh, wp, sound, autoTheme, city, defRemOn, defRemTime, notifStatus,
       setAccent, saveGoals, changeSound, toggleAutoTheme, changeCity, saveDefaultReminder, requestNotif, exportData, triggerImport, onImport, clearAll, importFile };
   },
@@ -1383,25 +1767,42 @@ const SettingsModal = {
 const WeatherModal = {
   setup() {
     const city = computed(() => CITIES.find(c => c.id === store.settings.city) || CITIES[0]);
-    const data = computed(() => { const cached = DB.get('weather_' + city.value.id, null); return cached?.data?.current || null; });
-    const wIcon = (c) => { if (c === 0) return '☀️'; if (c <= 3) return '🌤'; if (c <= 48) return '☁️'; if (c <= 67) return '🌧'; if (c <= 77) return '🌨'; if (c <= 82) return '🌧'; return '⛈'; };
-    const changeCity = (id) => { store.settings.city = id; store.save(); };
-    return { store, modals, CITIES, city, data, wIcon, faDigits, changeCity };
+    const changeCity = (id) => { store.settings.city = id; store.save(); fetchWeather(true); };
+    const retry = () => fetchWeather(true);
+    const lastUpdatedLabel = computed(() => {
+      if (!weatherState.lastUpdated) return '';
+      try { return new Intl.DateTimeFormat('fa-IR', { hour: '2-digit', minute: '2-digit' }).format(new Date(weatherState.lastUpdated)); }
+      catch { return ''; }
+    });
+    return { store, modals, CITIES, city, weatherState, wIcon, faDigits, changeCity, retry, lastUpdatedLabel };
   },
   template: `
     <div class="modal-bg" v-if="modals.weather" @click.self="modals.weather = false">
       <div class="modal">
         <h3>🌤 آب‌وهوا</h3>
-        <div v-if="data" style="text-align:center;padding:14px 0">
-          <div style="font-size:60px;margin-bottom:10px">{{ wIcon(data.weather_code) }}</div>
-          <div style="font-size:34px;font-weight:800;color:var(--accent)">{{ faDigits(Math.round(data.temperature_2m)) }}°C</div>
-          <div style="color:var(--muted);margin-top:6px">{{ city.name }}</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px">
-            <div class="stat-card"><div class="stat-num">{{ faDigits(Math.round(data.wind_speed_10m)) }}</div><div class="stat-lbl">باد (km/h)</div></div>
-            <div class="stat-card"><div class="stat-num">{{ faDigits(data.relative_humidity_2m) }}%</div><div class="stat-lbl">رطوبت</div></div>
-          </div>
+        <div v-if="weatherState.loading" class="empty">
+          <div class="empty-icon">⏳</div>
+          در حال دریافت اطلاعات...
         </div>
-        <div v-else class="empty"><div class="empty-icon">🌫</div>داده در دسترس نیست</div>
+        <div v-else-if="weatherState.error && !weatherState.data" class="empty">
+          <div class="empty-icon">🌫</div>
+          <div style="margin-bottom:10px">خطا در دریافت: {{ weatherState.error }}</div>
+          <button class="btn-sm" @click="retry">🔄 تلاش مجدد</button>
+        </div>
+        <div v-else-if="weatherState.data" style="text-align:center;padding:14px 0">
+          <div style="font-size:60px;margin-bottom:10px">{{ wIcon(weatherState.data.weather_code) }}</div>
+          <div style="font-size:34px;font-weight:800;color:var(--accent)">{{ faDigits(Math.round(weatherState.data.temperature_2m)) }}°C</div>
+          <div style="color:var(--muted);margin-top:6px">{{ city.name }}</div>
+          <div v-if="weatherState.error" style="color:var(--warn);font-size:11px;margin-top:6px">⚠️ {{ weatherState.error }} (نمایش داده‌ی ذخیره‌شده)</div>
+          <div v-if="lastUpdatedLabel" style="color:var(--muted);font-size:10px;margin-top:6px">آخرین به‌روزرسانی: {{ lastUpdatedLabel }}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px">
+            <div class="stat-card"><div class="stat-num">{{ faDigits(Math.round(weatherState.data.wind_speed_10m)) }}</div><div class="stat-lbl">باد (km/h)</div></div>
+            <div class="stat-card"><div class="stat-num">{{ faDigits(weatherState.data.relative_humidity_2m) }}%</div><div class="stat-lbl">رطوبت</div></div>
+          </div>
+          <button class="btn-sm" @click="retry" style="margin-top:14px">🔄 به‌روزرسانی</button>
+        </div>
+        <div v-else class="empty"><div class="empty-icon">🌫</div>داده‌ای موجود نیست</div>
+
         <div style="font-size:12px;color:var(--muted);margin-top:14px">🌍 تغییر شهر:</div>
         <div class="city-grid">
           <button v-for="c in CITIES" :key="c.id" class="city-btn" :class="{ active: store.settings.city === c.id }" @click="changeCity(c.id)">{{ c.name }}</button>
@@ -1437,6 +1838,7 @@ const CalDayModal = {
   `
 };
 
+/* (باگ ۲) — FocusOverlay.toggle ریست روزانه */
 const FocusOverlay = {
   setup() {
     const fmt = computed(() => { const m = Math.floor(pomoState.remaining / 60), s = pomoState.remaining % 60; return faDigits(String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0')); });
@@ -1444,9 +1846,12 @@ const FocusOverlay = {
     const toggle = () => {
       if (pomoState.running) {
         if (pomoState.endAt) pomoState.remaining = Math.max(1, Math.round((pomoState.endAt - Date.now()) / 1000));
-        if (pomoInterval) { clearInterval(pomoInterval); pomoInterval = null; }
+        intervalRegistry.clear(POMO_INTERVAL);
         pomoState.running = false; pomoState.endAt = null; savePomoState();
       } else {
+        store.pomo = resetPomoIfNewDay(store.pomo);
+        store.save();
+
         pomoState.running = true; pomoState.endAt = Date.now() + pomoState.remaining * 1000;
         savePomoState(); startPomoInterval();
       }
@@ -1519,7 +1924,7 @@ const BreathingModal = {
       scale.value = p.scale;
       let c = p.sec;
       count.value = c;
-      if (timer) clearInterval(timer);
+      if (timer) { clearInterval(timer); timer = null; }
       timer = setInterval(() => {
         c--;
         count.value = c;
@@ -1535,7 +1940,7 @@ const BreathingModal = {
     const stop = () => { active.value = false; if (timer) { clearInterval(timer); timer = null; } phase.value = 'آماده'; count.value = 0; scale.value = 1; };
 
     watch(() => modals.breathing, (v) => { if (!v) stop(); });
-    onUnmounted(() => { if (timer) clearInterval(timer); });
+    onUnmounted(() => { if (timer) { clearInterval(timer); timer = null; } });
 
     return { modals, phase, count, scale, active, start, stop, faDigits };
   },
@@ -1591,7 +1996,15 @@ const EmojiPickerModal = {
   `
 };
 
-/* ===== Quote of the day ===== */
+const ToastContainer = {
+  setup() { return { toast }; },
+  template: `
+    <div style="position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;width:calc(100% - 40px);max-width:380px">
+      <div v-for="t in toast.items" :key="t.id" :class="['toast', t.type]">{{ t.msg }}</div>
+    </div>
+  `
+};
+
 const QuoteBox = {
   setup() {
     const q = ref('');
@@ -1601,7 +2014,9 @@ const QuoteBox = {
   template: `<div class="quote-box" v-if="q">💬 {{ q }}</div>`
 };
 
-/* ===== Notifications ===== */
+/* ============================================================
+   Notification checker
+   ============================================================ */
 function checkReminders() {
   const now = new Date();
   const timeStr = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
@@ -1615,7 +2030,6 @@ function checkReminders() {
       t.lastReminded = today; changed = true;
     }
   });
-  // Default daily reminder
   const dr = store.settings.defaultReminder;
   if (dr?.enabled && dr.time === timeStr && store.settings._lastDefaultRem !== today) {
     if ('Notification' in window && Notification.permission === 'granted') {
@@ -1626,28 +2040,45 @@ function checkReminders() {
   }
   if (changed) store.save();
 }
-setInterval(checkReminders, 30000);
 
-/* ===== Views map ===== */
+/* ============================================================
+   Views map
+   ============================================================ */
 const views = { tasks: TasksView, habits: HabitsView, notes: NotesView, pomo: PomoView, calendar: CalendarView, stats: StatsView };
 
-/* ===== App ===== */
+/* ============================================================
+   App
+   ============================================================ */
 const App = {
-  components: { AppHeader, BottomNav, QuoteBox, NoteModal, TaskDetailModal, HelpModal, SettingsModal, WeatherModal, CalDayModal, FocusOverlay, SearchModal, BreathingModal, EmojiPickerModal },
+  components: { AppHeader, BottomNav, QuoteBox, NoteModal, TaskDetailModal, HelpModal, SettingsModal, WeatherModal, CalDayModal, FocusOverlay, SearchModal, BreathingModal, EmojiPickerModal, ToastContainer },
   setup() {
     store.applyTheme();
     const currentTab = ref(localStorage.getItem('sb_tab') || 'tasks');
     const changeTab = (id) => { currentTab.value = id; localStorage.setItem('sb_tab', id); window.scrollTo({ top: 0, behavior: 'smooth' }); };
     const currentView = computed(() => views[currentTab.value] || views.tasks);
+
     onMounted(() => {
+      /* (باگ ۲) — ریست روزانه هنگام راه‌اندازی */
+      store.pomo = resetPomoIfNewDay(store.pomo);
+      store.save();
+
       restorePomo();
-      // check auto theme periodically
-      setInterval(() => { if (store.settings.autoTheme) store.applyTheme(); }, 60000);
-      if (!localStorage.getItem('sb_seen_v2')) {
-        localStorage.setItem('sb_seen_v2', '1');
+
+      intervalRegistry.set('reminderCheck', checkReminders, 30000);
+      checkReminders();
+
+      intervalRegistry.set('autoTheme', () => { if (store.settings.autoTheme) store.applyTheme(); }, 60000);
+
+      if (!localStorage.getItem('sb_seen_v3')) {
+        localStorage.setItem('sb_seen_v3', '1');
         setTimeout(() => { modals.help = true; }, 600);
       }
     });
+
+    onUnmounted(() => {
+      intervalRegistry.clearAll();
+    });
+
     return { currentTab, changeTab, currentView };
   },
   template: `
@@ -1667,6 +2098,7 @@ const App = {
     <SearchModal />
     <BreathingModal />
     <EmojiPickerModal />
+    <ToastContainer />
   `
 };
 
