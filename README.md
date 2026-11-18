@@ -17,7 +17,7 @@ An all-in-one personal productivity app: notes, tasks, habits, a calendar and a 
 - **Calendar** using the Jalali calendar (`jalaali-js`)
 - **Pomodoro focus timer**
 - **4-7-8 breathing exercise**
-- **Weather widget** for major Iranian cities via the Open-Meteo API
+- **Weather widget** for a set of preset cities via the Open-Meteo API
 - **Stats and achievements** to keep motivation up
 - Light and dark themes, emoji picker, in-app guide
 - Backup and restore of all data
